@@ -5,10 +5,7 @@ body {
   padding: 16px;
 }
 
-h1 {
-  text-align: center;
-  margin-bottom: 12px;
-}
+h1 { text-align: center; margin-bottom: 12px; }
 
 button {
   border: none;
@@ -32,10 +29,7 @@ button {
   color: white;
 }
 
-ul {
-  list-style: none;
-  padding: 0;
-}
+ul { list-style: none; padding: 0; }
 
 li {
   padding: 14px;
@@ -50,20 +44,9 @@ li.section {
   font-weight: 700;
 }
 
-.timer {
-  text-align: center;
-  margin-top: 20px;
-}
+.timer { text-align: center; margin-top: 20px; }
 
-#time {
-  font-size: 48px;
-  margin: 8px 0;
-}
-
-#phaseLabel {
-  font-size: 20px;
-  font-weight: 700;
-}
+#time { font-size: 48px; }
 
 #phaseLabel.work { color: #4caf50; }
 #phaseLabel.rest { color: #ff5252; }
@@ -76,20 +59,11 @@ li.section {
   text-align: center;
 }
 
-.logBox button {
-  margin-top: 10px;
-  width: 100%;
-  background: #2e7d32;
-  color: white;
-}
-
-/* Library modal */
 #libraryModal {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,.85);
   display: none;
-  z-index: 999;
 }
 
 .libraryContent {
@@ -101,11 +75,4 @@ li.section {
   overflow-y: auto;
 }
 
-.libraryContent li {
-  background: #161616;
-}
-
-.libraryContent a {
-  color: #4da3ff;
-  text-decoration: none;
-}
+.libraryContent a { color: #4da3ff; }
