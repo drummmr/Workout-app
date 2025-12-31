@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Training Program</title>
+  <title>Training App</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -20,6 +20,14 @@
   <button onclick="loadWorkout('MOBILITY')">Mobility</button>
   <button onclick="openLibrary()">Library</button>
 </nav>
+
+<section id="timerPanel">
+  <div id="phaseLabel">READY</div>
+  <div id="timer">00:00</div>
+  <div id="progress"></div>
+  <button onclick="toggleSound()">🔊 Enable Sound</button>
+  <button onclick="stopTimer()">⏹ Stop</button>
+</section>
 
 <main>
   <ul id="workout"></ul>
