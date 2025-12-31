@@ -31,7 +31,7 @@ const cooldownMobility = [
 ];
 
 /* =====================
-   WORKOUT DATA
+   WORKOUT DEFINITIONS
 ===================== */
 
 const workouts = {
@@ -149,6 +149,10 @@ const workouts = {
     ]
   },
 
+  /* =====================
+     CARDIO – HIIT (3 OPTIONS)
+  ===================== */
+
   HIIT: {
     sections: [
       {
@@ -178,6 +182,10 @@ const workouts = {
       }
     ]
   },
+
+  /* =====================
+     CARDIO – LOW INTENSITY
+  ===================== */
 
   LOW: {
     sections: [
