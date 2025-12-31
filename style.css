@@ -1,0 +1,18 @@
+body{
+ background:#000;color:#fff;font-family:-apple-system;padding:20px;
+}
+h1{text-align:center;}
+button{
+ padding:14px;margin:5px;font-size:15px;border-radius:12px;
+ background:#222;color:#fff;border:none;
+}
+li{padding:10px;border-bottom:1px solid #333;}
+.timer{text-align:center;margin-top:20px;}
+#time{font-size:44px;}
+.calendar{text-align:center;margin-top:20px;}
+.day{
+ display:inline-block;width:36px;height:36px;line-height:36px;
+ margin:2px;border-radius:8px;background:#111;
+}
+.done{background:#2ecc71;color:#000;}
+.suggest{text-align:center;font-size:16px;margin-bottom:10px;}
