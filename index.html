@@ -1,35 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Workout App Pro</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workout App</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <h1>Workout App</h1>
 
-<div class="suggest" id="suggest"></div>
-
 <div class="buttons">
-  <button onclick="loadWorkout('A')">Day A</button>
-  <button onclick="loadWorkout('B')">Day B</button>
-  <button onclick="loadWorkout('C')">Day C</button>
-  <button onclick="loadWorkout('M')">Mobility</button>
+  <button onclick="loadWorkout('A')">Workout A</button>
+  <button onclick="loadWorkout('B')">Workout B</button>
+  <button onclick="loadWorkout('C')">Workout C</button>
+  <button onclick="loadWorkout('MOB')">Mobility</button>
+  <button onclick="loadWorkout('HIIT')">Cardio HIIT</button>
+  <button onclick="loadWorkout('LOW')">Cardio Low Intensity</button>
 </div>
 
 <ul id="workout"></ul>
 
 <div class="timer">
   <h2 id="time">00:00</h2>
-  <button onclick="startTimer()">▶</button>
-  <button onclick="pauseTimer()">⏸</button>
-  <button onclick="resetTimer()">🔁</button>
-</div>
-
-<div class="calendar">
-  <h3>Monthly Calendar</h3>
-  <div id="month"></div>
-  <button onclick="markWorkout()">✔ Mark Today Complete</button>
+  <button onclick="startTimer()">▶ Start</button>
+  <button onclick="pauseTimer()">⏸ Pause</button>
+  <button onclick="resetTimer()">🔁 Reset</button>
 </div>
 
 <script src="app.js"></script>
