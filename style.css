@@ -36,21 +36,25 @@ button {
 #timer {
   font-size: 48px;
   font-weight: bold;
-  margin: 6px 0;
 }
 
 #phaseLabel {
-  font-size: 14px;
   opacity: 0.7;
   letter-spacing: 1px;
 }
 
-#progress {
-  height: 6px;
+#progressBar {
   background: #333;
+  height: 6px;
   border-radius: 3px;
   overflow: hidden;
   margin: 8px 0;
+}
+
+#progressFill {
+  height: 100%;
+  width: 0%;
+  background: #4caf50;
 }
 
 .section {
@@ -64,15 +68,11 @@ button {
   padding: 10px;
   border-radius: 10px;
   margin-bottom: 6px;
+  border-left: 4px solid #4caf50;
 }
 
 .exercise.active {
-  border: 2px solid #4caf50;
-}
-
-.exercise.sub {
-  margin-left: 14px;
-  border-left: 3px solid #4caf50;
+  outline: 2px solid #4caf50;
 }
 
 .block {
@@ -100,4 +100,14 @@ button {
   margin: 8%;
   padding: 20px;
   border-radius: 12px;
+}
+
+#logPanel {
+  text-align: center;
+  padding: 10px;
+}
+
+#logStatus {
+  font-size: 13px;
+  opacity: 0.7;
 }
