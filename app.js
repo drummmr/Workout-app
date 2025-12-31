@@ -1,14 +1,17 @@
 let currentTime = 0;
+let totalTime = 0;
 let timer = null;
 let activeElement = null;
+let intervalConfig = null;
+let nextBeepAt = null;
 
 /* =====================
-   AUDIO (BEEPS)
+   AUDIO
 ===================== */
 
 const beepCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-function playBeep(freq = 1000, duration = 0.1) {
+function playBeep(freq = 1000, duration = 0.12) {
   const osc = beepCtx.createOscillator();
   const gain = beepCtx.createGain();
   osc.connect(gain);
@@ -19,7 +22,17 @@ function playBeep(freq = 1000, duration = 0.1) {
 }
 
 /* =====================
-   COOLDOWNS
+   INTERVAL PRESETS
+===================== */
+
+const intervalPresets = {
+  intervals30: { pattern: [30, 30] },   // HIIT
+  tabata: { pattern: [20, 10] },        // Tabata
+  emom: { pattern: [60] }               // EMOM
+};
+
+/* =====================
+   COOLDOWNS (UNCHANGED)
 ===================== */
 
 const cooldownStrength = [
@@ -52,113 +65,33 @@ const cooldownMobility = [
 ===================== */
 
 const workouts = {
-  A: {
-    sections: [
-      { title: "Warm-Up", items: [
-        { name: "Jump Rope / March", time: 60 },
-        { name: "World’s Greatest Stretch", time: 45 },
-        { name: "KB Halos", time: 30 }
-      ]},
-      { title: "Main Lifts", items: [
-        { name: "Back Squat – 4×5", time: 90 },
-        { name: "Bench Press – 4×8", time: 90 }
-      ]},
-      { title: "Kettlebell Volume / Finisher", items: [
-        { name: "KB Goblet Squat – 3×12", time: 60 },
-        { name: "KB Push Press – 3×8/side", time: 60 }
-      ]},
-      { title: "Cool Down", items: cooldownStrength }
-    ]
-  },
-
-  B: {
-    sections: [
-      { title: "Warm-Up", items: [
-        { name: "Row / Bike Easy", time: 60 },
-        { name: "Hip Openers", time: 45 },
-        { name: "Glute Bridges", time: 45 }
-      ]},
-      { title: "Main Lifts", items: [
-        { name: "Deadlift – 4×5", time: 120 },
-        { name: "Pull-Ups – 4×8", time: 90 }
-      ]},
-      { title: "Kettlebell Volume / Finisher", items: [
-        { name: "KB Swings – 10×15", time: 45 }
-      ]},
-      { title: "Cool Down", items: cooldownStrength }
-    ]
-  },
-
-  C: {
-    sections: [
-      { title: "Warm-Up", items: [
-        { name: "Jump Rope / Shadow Box", time: 60 },
-        { name: "Thoracic Rotations", time: 45 },
-        { name: "KB Halos", time: 30 }
-      ]},
-      { title: "Main Lifts", items: [
-        { name: "Clean & Press – 5×3", time: 90 },
-        { name: "Front Squat – 4×6", time: 90 }
-      ]},
-      { title: "Kettlebell Volume / Finisher", items: [
-        { name: "KB Rows – 4×12", time: 60 },
-        { name: "KB Lunges – 3×10/side", time: 60 }
-      ]},
-      { title: "Cool Down", items: cooldownStrength }
-    ]
-  },
-
-  MOB: {
-    sections: [
-      { title: "Mobility Flow", items: [
-        { name: "Breathing Reset", time: 120 },
-        { name: "Cat–Cow", time: 60 },
-        { name: "World’s Greatest Stretch", time: 60 },
-        { name: "90/90 Hip Rotations", time: 60 },
-        { name: "Deep Squat Hold + Pry", time: 90 },
-        { name: "Thoracic Rotations", time: 60 },
-        { name: "Shoulder CARs", time: 60 }
-      ]},
-      { title: "Cool Down", items: cooldownMobility }
-    ]
-  },
-
   HIIT: {
     sections: [
       {
-        title: "HIIT Option 1 – Intervals",
+        title: "HIIT Option 1 – Intervals (30/30)",
         items: [
-          { name: "30s Hard / 30s Easy × 10", time: 600, interval: 30 }
+          { name: "30s Hard / 30s Easy × 10", time: 600, preset: "intervals30" }
         ]
       },
       {
         title: "HIIT Option 2 – Tabata",
         items: [
-          { name: "20s On / 10s Off × 8 (2–3 Rounds)", time: 480, interval: 20 }
+          { name: "20s On / 10s Off × 8 (2–3 Rounds)", time: 480, preset: "tabata" }
         ]
       },
       {
         title: "HIIT Option 3 – EMOM",
         items: [
-          { name: "EMOM 12–15 min", time: 900, interval: 60 }
+          { name: "EMOM 12–15 min", time: 900, preset: "emom" }
         ]
       },
       { title: "Cool Down", items: cooldownHIIT }
-    ]
-  },
-
-  LOW: {
-    sections: [
-      { title: "Low-Intensity Cardio (KISS)", items: [
-        { name: "Incline Walk / Easy Bike", time: 1200 }
-      ]},
-      { title: "Cool Down", items: cooldownLow }
     ]
   }
 };
 
 /* =====================
-   APP LOGIC
+   LOAD WORKOUT
 ===================== */
 
 function loadWorkout(key) {
@@ -175,46 +108,67 @@ function loadWorkout(key) {
       const li = document.createElement("li");
       li.innerHTML = `${ex.name}<br>⏱ ${ex.time}s`;
 
-      li.onclick = () => {
-        setTimer(ex.time, ex.interval || null, li);
-      };
-
+      li.onclick = () => setTimer(ex.time, ex.preset || null, li);
       ul.appendChild(li);
     });
   });
 }
 
-function setTimer(seconds, interval = null, element = null) {
+/* =====================
+   TIMER SETUP
+===================== */
+
+function setTimer(seconds, presetKey, element) {
+  pauseTimer();
+
   currentTime = seconds;
-  currentInterval = interval;
+  totalTime = seconds;
   updateTimer();
+
+  intervalConfig = presetKey ? intervalPresets[presetKey] : null;
+  nextBeepAt = intervalConfig ? totalTime - intervalConfig.pattern[0] : null;
 
   if (activeElement) activeElement.classList.remove("active");
   activeElement = element;
   if (activeElement) activeElement.classList.add("active");
 }
 
-let currentInterval = null;
+/* =====================
+   TIMER LOOP
+===================== */
 
 function startTimer() {
   if (timer) return;
 
-  let lastInterval = currentTime;
+  let patternIndex = 0;
+  let segmentRemaining = intervalConfig ? intervalConfig.pattern[0] : null;
 
   timer = setInterval(() => {
-    if (currentTime > 0) {
-      currentTime--;
-      updateTimer();
-
-      if (currentInterval && currentTime % currentInterval === 0) {
-        playBeep(1200, 0.08);
-      }
-    } else {
-      playBeep(400, 0.4);
+    if (currentTime <= 0) {
+      playBeep(400, 0.4); // end beep
       pauseTimer();
+      return;
+    }
+
+    currentTime--;
+    updateTimer();
+
+    if (intervalConfig) {
+      segmentRemaining--;
+
+      if (segmentRemaining === 0) {
+        playBeep(1200, 0.12); // interval change
+
+        patternIndex = (patternIndex + 1) % intervalConfig.pattern.length;
+        segmentRemaining = intervalConfig.pattern[patternIndex];
+      }
     }
   }, 1000);
 }
+
+/* =====================
+   CONTROLS
+===================== */
 
 function pauseTimer() {
   clearInterval(timer);
