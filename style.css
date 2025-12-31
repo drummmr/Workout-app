@@ -1,78 +1,81 @@
 body {
-  background: #0b0b0b;
-  color: #fff;
+  margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  padding: 16px;
+  background: #0e0e0e;
+  color: #ffffff;
 }
 
-h1 { text-align: center; margin-bottom: 12px; }
+header {
+  padding: 16px;
+  text-align: center;
+  background: #121212;
+}
+
+nav {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
 
 button {
+  background: #1f1f1f;
+  color: #ffffff;
   border: none;
-  border-radius: 14px;
-  padding: 14px;
-  font-size: 16px;
-  font-weight: 700;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
 }
 
-#soundBtn {
-  width: 100%;
-  margin-bottom: 12px;
-  background: linear-gradient(180deg,#2e7d32,#1b5e20);
-  color: white;
+ul {
+  list-style: none;
+  padding: 12px;
 }
 
-.buttons button {
-  width: 100%;
-  margin-bottom: 8px;
-  background: #1e1e1e;
-  color: white;
+.section {
+  font-weight: 600;
+  margin-top: 20px;
+  margin-bottom: 6px;
+  opacity: 0.85;
 }
 
-ul { list-style: none; padding: 0; }
-
-li {
-  padding: 14px;
-  margin-bottom: 8px;
+.exercise {
   background: #161616;
-  border-radius: 12px;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 6px;
 }
 
-li.section {
+.exercise.sub {
+  margin-left: 14px;
+  background: #1c1c1c;
+  border-left: 3px solid #4caf50;
+}
+
+.block {
   background: #0f0f0f;
-  font-size: 18px;
-  font-weight: 700;
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin-bottom: 6px;
 }
 
-.timer { text-align: center; margin-top: 20px; }
-
-#time { font-size: 48px; }
-
-#phaseLabel.work { color: #4caf50; }
-#phaseLabel.rest { color: #ff5252; }
-
-.logBox {
-  margin-top: 16px;
-  padding: 14px;
-  background: #161616;
-  border-radius: 14px;
-  text-align: center;
+.blockNote {
+  font-size: 13px;
+  opacity: 0.65;
+  text-transform: uppercase;
 }
 
-#libraryModal {
+.modal {
+  display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.85);
-  display: none;
+  background: rgba(0,0,0,0.85);
 }
 
-.libraryContent {
-  background: #0f0f0f;
-  margin: 40px 16px;
-  padding: 16px;
-  border-radius: 16px;
-  max-height: 85vh;
-  overflow-y: auto;
+.modalContent {
+  background: #121212;
+  margin: 10%;
+  padding: 20px;
+  border-radius: 12px;
 }
-
-.libraryContent a { color: #4da3ff; }
