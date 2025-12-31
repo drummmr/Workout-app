@@ -1,231 +1,168 @@
 let timer = null;
 let currentWorkout = null;
-let audioCtx = null;
-let audioUnlocked = false;
 
-/* AUDIO */
-function unlockAudio() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === "suspended") audioCtx.resume();
-  audioUnlocked = true;
-}
-function enableSound() {
-  unlockAudio();
-  document.getElementById("soundBtn").style.display = "none";
-}
-function beep(freq = 1000, dur = 0.15) {
-  if (!audioUnlocked) return;
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
-  o.connect(g); g.connect(audioCtx.destination);
-  o.frequency.value = freq;
-  g.gain.value = 0.3;
-  o.start();
-  o.stop(audioCtx.currentTime + dur);
-}
-
-/* TIMER HELPERS */
-function updateDisplay(sec) {
-  document.getElementById("time").textContent =
-    `${String(Math.floor(sec/60)).padStart(2,"0")}:${String(sec%60).padStart(2,"0")}`;
-}
-function setPhase(t,c){const p=document.getElementById("phaseLabel");p.textContent=t;p.className=c;}
-function clearPhase(){document.getElementById("phaseLabel").textContent="";}
-function setProgress(t){document.getElementById("progressLabel").textContent=t;}
-function clearProgress(){document.getElementById("progressLabel").textContent="";}
-function stopTimer(){clearInterval(timer);clearPhase();clearProgress();updateDisplay(0);}
-
-/* HIIT TIMERS */
-function startTabata(){
-  unlockAudio(); stopTimer();
-  let r=1,p="work",t=20;
-  setPhase("WORK","work"); setProgress(`Round ${r}/8`); updateDisplay(t); beep();
-  timer=setInterval(()=>{
-    t--; updateDisplay(t);
-    if(t<=0){beep();
-      if(p==="work"){p="rest";t=10;setPhase("REST","rest");}
-      else{r++; if(r>8){stopTimer();return;}
-        p="work";t=20;setPhase("WORK","work");setProgress(`Round ${r}/8`);}
-    }
-  },1000);
-}
-function startHIIT3030(){
-  unlockAudio(); stopTimer();
-  let r=1,p="work",t=30;
-  setPhase("WORK","work"); setProgress(`Round ${r}/10`); updateDisplay(t); beep();
-  timer=setInterval(()=>{
-    t--; updateDisplay(t);
-    if(t<=0){beep();
-      if(p==="work"){p="rest";t=30;setPhase("REST","rest");}
-      else{r++; if(r>10){stopTimer();return;}
-        p="work";t=30;setPhase("WORK","work");setProgress(`Round ${r}/10`);}
-    }
-  },1000);
-}
-function startEMOM(){
-  unlockAudio(); stopTimer();
-  let m=1,t=60;
-  setPhase("EMOM","work"); setProgress(`Minute ${m}/10`); updateDisplay(t); beep();
-  timer=setInterval(()=>{
-    t--; updateDisplay(t);
-    if(t<=0){beep(); m++; if(m>10){stopTimer();return;}
-      t=60; setProgress(`Minute ${m}/10`);
-    }
-  },1000);
-}
-
-/* FULL PROGRAM */
+/* ===================== WORKOUT DATA ===================== */
 const workouts = {
   A: [
-    { section:"Warm-Up" },
-    { name:"Jump Rope",sets:"2",reps:"1 min" },
-    { name:"Glute Bridge",sets:"2",reps:"15" },
-    { name:"World’s Greatest Stretch",sets:"2",reps:"5/side" },
+    { section: "Day A – Squat + Push (35 min)" },
 
-    { section:"Main Lifts" },
-    { name:"Back Squat",sets:"4",reps:"5",rest:"2–3 min" },
-    { name:"Bench Press",sets:"4",reps:"6",rest:"2 min" },
-    { name:"Bent Over Row",sets:"3",reps:"8" },
+    { section: "Warm-Up (8–10 min)" },
+    { name: "Jump Rope", sets: "2", reps: "1 min" },
+    { name: "Glute Bridge", sets: "2", reps: "15" },
+    { name: "World’s Greatest Stretch", sets: "2", reps: "5/side" },
 
-    { section:"Finisher" },
-    { name:"Kettlebell Swings",sets:"3",reps:"20" },
+    { section: "Strength Superset (15 min)" },
+    { name: "Barbell Back Squat", sets: "4", reps: "5" },
+    { name: "Push-Ups or Bench Press", sets: "4", reps: "6–10", note: "Alternate movements" },
 
-    { section:"Cooldown" },
-    { name:"Hamstring Stretch",sets:"2",reps:"30 sec" },
-    { name:"Child’s Pose",sets:"2",reps:"45 sec" },
-    { name:"Breathing Reset",sets:"2",reps:"60 sec" }
+    { section: "Kettlebell Volume (10 min)" },
+    { name: "Goblet Squat", sets: "3", reps: "12" },
+    { name: "Single-Arm KB Overhead Press", sets: "3", reps: "8/side" },
+
+    { section: "Finisher (5–7 min)" },
+    { name: "KB Swings + Burpees", reps: "10 swings / 10 burpees", note: "Repeat continuously" },
+
+    { section: "Cooldown (5–7 min)" },
+    { name: "Hamstring Stretch", sets: "2", reps: "30 sec" },
+    { name: "Couch Stretch", sets: "2", reps: "45 sec/side" },
+    { name: "Breathing Reset", sets: "2", reps: "60 sec" }
   ],
 
   B: [
-    { section:"Warm-Up" },
-    { name:"Bodyweight Squat",sets:"2",reps:"15" },
-    { name:"Hip Flexor Stretch",sets:"2",reps:"30 sec" },
+    { section: "Day B – Hinge + Pull (35 min)" },
 
-    { section:"Main Lifts" },
-    { name:"Deadlift",sets:"4",reps:"3–5",rest:"3 min" },
-    { name:"Overhead Press",sets:"4",reps:"6" },
-    { name:"Pull-Ups",sets:"3",reps:"AMRAP" },
+    { section: "Warm-Up (8–10 min)" },
+    { name: "Jump Rope", sets: "2", reps: "1 min" },
+    { name: "Glute Bridge", sets: "2", reps: "15" },
+    { name: "World’s Greatest Stretch", sets: "2", reps: "5/side" },
 
-    { section:"Finisher" },
-    { name:"Farmer Carry",sets:"4",reps:"30 m" },
+    { section: "Strength Superset (15 min)" },
+    { name: "Deadlift", sets: "4", reps: "4–5" },
+    { name: "Pull-Ups or Lat Pulldown", sets: "4", reps: "6–10" },
 
-    { section:"Cooldown" },
-    { name:"Couch Stretch",sets:"2",reps:"45 sec/side" },
-    { name:"Thoracic Rotation",sets:"2",reps:"8/side" }
+    { section: "Kettlebell Volume (10 min)" },
+    { name: "KB Romanian Deadlift", sets: "3", reps: "12" },
+    { name: "Single-Arm KB Row", sets: "3", reps: "10/side" },
+
+    { section: "Finisher (5–7 min)" },
+    { name: "KB Swings + Goblet Squats", reps: "20 swings / 15 squats", note: "2–3 fast rounds" },
+
+    { section: "Cooldown (5–7 min)" },
+    { name: "Hamstring Stretch", sets: "2", reps: "30 sec" },
+    { name: "Couch Stretch", sets: "2", reps: "45 sec/side" },
+    { name: "Breathing Reset", sets: "2", reps: "60 sec" }
   ],
 
   C: [
-    { section:"Warm-Up" },
-    { name:"Jump Rope",sets:"2",reps:"1 min" },
-    { name:"90/90 Hip Mobility",sets:"2",reps:"60 sec" },
+    { section: "Day C – Full-Body Conditioning (30–40 min)" },
 
-    { section:"Main Lifts" },
-    { name:"Front Squat",sets:"4",reps:"6" },
-    { name:"Romanian Deadlift",sets:"3",reps:"8" },
-    { name:"Push-Ups",sets:"3",reps:"AMRAP" },
+    { section: "Warm-Up (8–10 min)" },
+    { name: "Jump Rope", sets: "2", reps: "1 min" },
+    { name: "Glute Bridge", sets: "2", reps: "15" },
+    { name: "World’s Greatest Stretch", sets: "2", reps: "5/side" },
 
-    { section:"KB Volume" },
-    { name:"Kettlebell Clean + Press",sets:"5",reps:"5/side" },
+    { section: "Power & Strength (15 min)" },
+    { name: "Clean & Press (Barbell or KB)", sets: "5", reps: "3" },
+    { name: "Front Squat or Double KB Squat", sets: "4", reps: "6" },
 
-    { section:"Cooldown" },
-    { name:"Hamstring Stretch",sets:"2",reps:"30 sec" },
-    { name:"Breathing Reset",sets:"2",reps:"60 sec" }
+    { section: "Conditioning Circuit (10–15 min)" },
+    { name: "KB Swings", reps: "10" },
+    { name: "Reverse Lunges", reps: "8/leg" },
+    { name: "Plank", reps: "30 sec", note: "AMRAP" },
+
+    { section: "Cooldown (5–7 min)" },
+    { name: "Hamstring Stretch", sets: "2", reps: "30 sec" },
+    { name: "Couch Stretch", sets: "2", reps: "45 sec/side" },
+    { name: "Breathing Reset", sets: "2", reps: "60 sec" }
   ],
 
   HIIT: [
-    { section:"HIIT Options" },
-    { name:"Tabata 20/10 x8",action:startTabata },
-    { name:"HIIT 30/30 x10",action:startHIIT3030 },
-    { name:"EMOM x10",action:startEMOM },
-
-    { section:"Cooldown" },
-    { name:"Walking",sets:"5",reps:"min" },
-    { name:"Calf Stretch",sets:"2",reps:"30 sec" }
+    { section: "HIIT Options" },
+    { name: "Tabata 20/10 x8", action: startTabata },
+    { name: "HIIT 30/30 x10", action: startHIIT3030 },
+    { name: "EMOM x10", action: startEMOM }
   ],
 
   MOBILITY: [
-    { section:"Full Mobility Session" },
-    { name:"World’s Greatest Stretch",sets:"2",reps:"5/side" },
-    { name:"90/90 Hip Mobility",sets:"2",reps:"60 sec" },
-    { name:"Thoracic Rotation",sets:"2",reps:"8/side" },
-    { name:"Couch Stretch",sets:"2",reps:"60 sec/side" },
-    { name:"Child’s Pose",sets:"2",reps:"60 sec" },
-    { name:"Breathing Reset",sets:"3",reps:"60 sec" }
+    { section: "Full Mobility Session" },
+    { name: "World’s Greatest Stretch", reps: "5/side" },
+    { name: "90/90 Hip Mobility", reps: "60 sec" },
+    { name: "Thoracic Rotation", reps: "8/side" },
+    { name: "Couch Stretch", reps: "60 sec/side" },
+    { name: "Breathing Reset", reps: "60 sec" }
   ]
 };
 
-/* VIDEO MAP */
-const videoMap = {
-  "Jump Rope":"https://www.youtube.com/watch?v=1BZM8k1mH8Y",
-  "Glute Bridge":"https://www.youtube.com/watch?v=m2Zx-57cSok",
-  "World’s Greatest Stretch":"https://www.youtube.com/watch?v=Fsa_CjlT6IY",
-  "Back Squat":"https://www.youtube.com/watch?v=SW_C1A-rejs",
-  "Bench Press":"https://www.youtube.com/watch?v=rT7DgCr-3pg",
-  "Bent Over Row":"https://www.youtube.com/watch?v=FWJR5Ve8bnQ",
-  "Kettlebell Swings":"https://www.youtube.com/watch?v=YSxHifyI6s8",
-  "Hamstring Stretch":"https://www.youtube.com/watch?v=Z7ZKzj9gJpU",
-  "Child’s Pose":"https://www.youtube.com/watch?v=eqVMAPM00DM",
-  "Deadlift":"https://www.youtube.com/watch?v=op9kVnSso6Q",
-  "Overhead Press":"https://www.youtube.com/watch?v=2yjwXTZQDDI",
-  "Pull-Ups":"https://www.youtube.com/watch?v=eGo4IYlbE5g",
-  "Farmer Carry":"https://www.youtube.com/watch?v=Fkzk_RqlYig",
-  "Front Squat":"https://www.youtube.com/watch?v=v-mQm_droHg",
-  "Romanian Deadlift":"https://www.youtube.com/watch?v=2SHsk9AzdjA",
-  "Push-Ups":"https://www.youtube.com/watch?v=IODxDxX7oi4",
-  "90/90 Hip Mobility":"https://www.youtube.com/watch?v=2uYJZfB3k_U",
-  "Thoracic Rotation":"https://www.youtube.com/watch?v=7vE7n6Lw3tU",
-  "Couch Stretch":"https://www.youtube.com/watch?v=GvZp3D7xvGk",
-  "Breathing Reset":"https://www.youtube.com/watch?v=8TuRYV71Rgo"
-};
+/* ===================== RENDER ===================== */
+function loadWorkout(type) {
+  currentWorkout = type;
+  const ul = document.getElementById("workout");
+  ul.innerHTML = "";
 
-/* RENDER */
-function loadWorkout(type){
-  currentWorkout=type;
-  const ul=document.getElementById("workout");
-  ul.innerHTML="";
-  workouts[type].forEach(item=>{
-    if(item.section){
-      const h=document.createElement("li");
-      h.textContent=item.section;
-      h.className="section";
-      ul.appendChild(h); return;
+  workouts[type].forEach(item => {
+    if (item.section) {
+      const li = document.createElement("li");
+      li.textContent = item.section;
+      li.className = "section";
+      ul.appendChild(li);
+      return;
     }
-    const li=document.createElement("li");
-    li.innerHTML=`<strong>${item.name}</strong>
-      ${item.sets?`<div>${item.sets} × ${item.reps}</div>`:""}
-      ${item.rest?`<div style="opacity:.6">Rest: ${item.rest}</div>`:""}`;
-    if(item.action) li.onclick=item.action;
+
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <strong>${item.name}</strong>
+      ${item.sets ? `<div>${item.sets} × ${item.reps}</div>` : ""}
+      ${!item.sets && item.reps ? `<div>${item.reps}</div>` : ""}
+      ${item.note ? `<div style="opacity:.6">${item.note}</div>` : ""}
+    `;
+    if (item.action) li.onclick = item.action;
     ul.appendChild(li);
   });
 }
 
-/* LOGGING */
-function logWorkout(){
-  if(!currentWorkout) return alert("Start workout first");
-  const log=JSON.parse(localStorage.getItem("log"))||[];
-  log.push({w:currentWorkout,d:new Date().toLocaleString()});
-  localStorage.setItem("log",JSON.stringify(log));
+/* ===================== LOGGING ===================== */
+function logWorkout() {
+  if (!currentWorkout) return alert("Start a workout first");
+  const log = JSON.parse(localStorage.getItem("log")) || [];
+  log.push({ workout: currentWorkout, date: new Date().toLocaleString() });
+  localStorage.setItem("log", JSON.stringify(log));
   updateLastWorkout();
 }
-function updateLastWorkout(){
-  const log=JSON.parse(localStorage.getItem("log"))||[];
-  if(!log.length) return;
-  const l=log[log.length-1];
-  document.getElementById("lastWorkout").textContent=`Last workout: ${l.w} (${l.d})`;
+
+function updateLastWorkout() {
+  const log = JSON.parse(localStorage.getItem("log")) || [];
+  if (!log.length) return;
+  const last = log[log.length - 1];
+  document.getElementById("lastWorkout").textContent =
+    `Last workout: ${last.workout} (${last.date})`;
 }
+
 updateLastWorkout();
 
-/* LIBRARY */
-function openLibrary(){
-  const list=document.getElementById("libraryList");
-  list.innerHTML="";
-  const set=new Set();
-  Object.values(workouts).forEach(d=>d.forEach(i=>i.name&&set.add(i.name)));
-  [...set].sort().forEach(n=>{
-    const li=document.createElement("li");
-    li.innerHTML=videoMap[n]?`<a href="${videoMap[n]}" target="_blank">${n}</a>`:`${n} (video coming)`;
+/* ===================== LIBRARY ===================== */
+function openLibrary() {
+  const list = document.getElementById("libraryList");
+  list.innerHTML = "";
+  const set = new Set();
+
+  Object.values(workouts).forEach(day =>
+    day.forEach(item => item.name && set.add(item.name))
+  );
+
+  [...set].sort().forEach(name => {
+    const li = document.createElement("li");
+    li.textContent = name;
     list.appendChild(li);
   });
-  document.getElementById("libraryModal").style.display="block";
+
+  document.getElementById("libraryModal").style.display = "block";
 }
-function closeLibrary(){document.getElementById("libraryModal").style.display="none";}
+
+function closeLibrary() {
+  document.getElementById("libraryModal").style.display = "none";
+}
+
+/* ===================== TIMER PLACEHOLDERS ===================== */
+function startTabata(){}
+function startHIIT3030(){}
+function startEMOM(){}
