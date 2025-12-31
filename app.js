@@ -3,14 +3,34 @@ let activeElement = null;
 
 /* ================= AUDIO ================= */
 
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+/* ================= AUDIO ================= */
+
+let audioCtx = null;
+let audioUnlocked = false;
+
+function unlockAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+
+  audioUnlocked = true;
+}
 
 function beep(freq = 1000, duration = 0.15) {
+  if (!audioUnlocked) return;
+
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.connect(gain);
   gain.connect(audioCtx.destination);
+
   osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+
   osc.start();
   osc.stop(audioCtx.currentTime + duration);
 }
@@ -105,6 +125,7 @@ function loadWorkout(key) {
 /* ================= HIIT 30 / 30 ================= */
 
 function startHIIT3030(element, rounds = 10) {
+  unlockAudio();
   stopTimer();
   highlight(element);
 
@@ -148,6 +169,7 @@ function startHIIT3030(element, rounds = 10) {
 /* ================= TABATA ================= */
 
 function startTabata(element) {
+  unlockAudio();
   stopTimer();
   highlight(element);
 
@@ -192,6 +214,7 @@ function startTabata(element) {
 /* ================= EMOM ================= */
 
 function startEMOM(element, minutes = 12) {
+  unlockAudio();
   stopTimer();
   highlight(element);
 
