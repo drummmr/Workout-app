@@ -2,41 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Workout App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Workout Program</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<h1>Today’s Workout</h1>
+<header>
+  <h1>Training Program</h1>
+</header>
 
-<button id="soundBtn" onclick="enableSound()">🔊 Enable Sound</button>
-
-<div class="buttons">
+<nav>
   <button onclick="loadWorkout('A')">Workout A</button>
   <button onclick="loadWorkout('B')">Workout B</button>
   <button onclick="loadWorkout('C')">Workout C</button>
-  <button onclick="loadWorkout('HIIT')">Cardio HIIT</button>
-  <button onclick="loadWorkout('MOBILITY')">Mobility</button>
   <button onclick="openLibrary()">Library</button>
-</div>
+</nav>
 
-<ul id="workout"></ul>
+<main>
+  <ul id="workout"></ul>
+</main>
 
-<div class="timer">
-  <div id="phaseLabel"></div>
-  <div id="progressLabel"></div>
-  <h2 id="time">00:00</h2>
-  <button onclick="stopTimer()">Stop Timer</button>
-</div>
-
-<div class="logBox">
-  <p id="lastWorkout">Last workout: None</p>
-  <button onclick="logWorkout()">✅ Log This Workout</button>
-</div>
-
-<div id="libraryModal">
-  <div class="libraryContent">
+<div id="libraryModal" class="modal">
+  <div class="modalContent">
     <h2>Exercise Library</h2>
     <ul id="libraryList"></ul>
     <button onclick="closeLibrary()">Close</button>
