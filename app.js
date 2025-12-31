@@ -1,145 +1,131 @@
-let timer = null;
-let currentWorkout = null;
-
-/* ===================== WORKOUT DATA ===================== */
 const workouts = {
   A: [
-    { section: "Day A – Squat + Push (35 min)" },
-
-    { section: "Warm-Up (8–10 min)" },
-    { name: "Jump Rope", sets: "2", reps: "1 min" },
-    { name: "Glute Bridge", sets: "2", reps: "15" },
-    { name: "World’s Greatest Stretch", sets: "2", reps: "5/side" },
+    { section: "Warm-Up (5–7 min)" },
+    { name: "World’s Greatest Stretch", reps: "5/side" },
+    { name: "Glute Bridge", reps: "15" },
+    { name: "Push-Ups", reps: "10" },
 
     { section: "Strength Superset (15 min)" },
-    { name: "Barbell Back Squat", sets: "4", reps: "5" },
-    { name: "Push-Ups or Bench Press", sets: "4", reps: "6–10", note: "Alternate movements" },
+    { note: "Alternate movements" },
+    { name: "Barbell Back Squat", sets: 4, reps: "5" },
+    { name: "Push-Ups or Bench Press", sets: 4, reps: "6–10" },
 
     { section: "Kettlebell Volume (10 min)" },
-    { name: "Goblet Squat", sets: "3", reps: "12" },
-    { name: "Single-Arm KB Overhead Press", sets: "3", reps: "8/side" },
+    { name: "Goblet Squat", sets: 3, reps: "12" },
+    { name: "Single-Arm KB Overhead Press", sets: 3, reps: "8/side" },
 
     { section: "Finisher (5–7 min)" },
-    { name: "KB Swings + Burpees", reps: "10 swings / 10 burpees", note: "Repeat continuously" },
+    { note: "Repeat continuously" },
+    { name: "Kettlebell Swings", reps: "10" },
+    { name: "Burpees", reps: "10" },
 
-    { section: "Cooldown (5–7 min)" },
-    { name: "Hamstring Stretch", sets: "2", reps: "30 sec" },
-    { name: "Couch Stretch", sets: "2", reps: "45 sec/side" },
-    { name: "Breathing Reset", sets: "2", reps: "60 sec" }
+    { section: "Cooldown (5 min)" },
+    { name: "Couch Stretch", reps: "1 min/side" },
+    { name: "Chest Opener Stretch", reps: "1–2 min" }
   ],
 
   B: [
-    { section: "Day B – Hinge + Pull (35 min)" },
-
-    { section: "Warm-Up (8–10 min)" },
-    { name: "Jump Rope", sets: "2", reps: "1 min" },
-    { name: "Glute Bridge", sets: "2", reps: "15" },
-    { name: "World’s Greatest Stretch", sets: "2", reps: "5/side" },
+    { section: "Warm-Up (5–7 min)" },
+    { name: "Hip Hinge Drill", reps: "15" },
+    { name: "Band Pull-Aparts", reps: "20" },
 
     { section: "Strength Superset (15 min)" },
-    { name: "Deadlift", sets: "4", reps: "4–5" },
-    { name: "Pull-Ups or Lat Pulldown", sets: "4", reps: "6–10" },
+    { note: "Alternate movements" },
+    { name: "Deadlift", sets: 4, reps: "4–5" },
+    { name: "Pull-Ups or Lat Pulldown", sets: 4, reps: "6–10" },
 
     { section: "Kettlebell Volume (10 min)" },
-    { name: "KB Romanian Deadlift", sets: "3", reps: "12" },
-    { name: "Single-Arm KB Row", sets: "3", reps: "10/side" },
+    { name: "KB Romanian Deadlift", sets: 3, reps: "12" },
+    { name: "Single-Arm KB Row", sets: 3, reps: "10/side" },
 
     { section: "Finisher (5–7 min)" },
-    { name: "KB Swings + Goblet Squats", reps: "20 swings / 15 squats", note: "2–3 fast rounds" },
+    { note: "2–3 fast rounds" },
+    { name: "Kettlebell Swings", reps: "20" },
+    { name: "Goblet Squats", reps: "15" },
 
-    { section: "Cooldown (5–7 min)" },
-    { name: "Hamstring Stretch", sets: "2", reps: "30 sec" },
-    { name: "Couch Stretch", sets: "2", reps: "45 sec/side" },
-    { name: "Breathing Reset", sets: "2", reps: "60 sec" }
+    { section: "Cooldown (5 min)" },
+    { name: "Hamstring Stretch", reps: "1 min/side" },
+    { name: "Lat Stretch", reps: "1 min/side" }
   ],
 
   C: [
-    { section: "Day C – Full-Body Conditioning (30–40 min)" },
-
-    { section: "Warm-Up (8–10 min)" },
-    { name: "Jump Rope", sets: "2", reps: "1 min" },
-    { name: "Glute Bridge", sets: "2", reps: "15" },
-    { name: "World’s Greatest Stretch", sets: "2", reps: "5/side" },
+    { section: "Warm-Up (5–7 min)" },
+    { name: "Jump Rope", reps: "2 min" },
+    { name: "Bodyweight Squats", reps: "15" },
 
     { section: "Power & Strength (15 min)" },
-    { name: "Clean & Press (Barbell or KB)", sets: "5", reps: "3" },
-    { name: "Front Squat or Double KB Squat", sets: "4", reps: "6" },
+    { name: "Clean & Press (Barbell or KB)", sets: 5, reps: "3" },
+    { name: "Front Squat or Double KB Squat", sets: 4, reps: "6" },
 
     { section: "Conditioning Circuit (10–15 min)" },
-    { name: "KB Swings", reps: "10" },
+    { note: "AMRAP" },
+    { name: "Kettlebell Swings", reps: "10" },
     { name: "Reverse Lunges", reps: "8/leg" },
-    { name: "Plank", reps: "30 sec", note: "AMRAP" },
+    { name: "Plank", reps: "30 sec" },
 
-    { section: "Cooldown (5–7 min)" },
-    { name: "Hamstring Stretch", sets: "2", reps: "30 sec" },
-    { name: "Couch Stretch", sets: "2", reps: "45 sec/side" },
-    { name: "Breathing Reset", sets: "2", reps: "60 sec" }
+    { section: "Cooldown (5 min)" },
+    { name: "Hip Flexor Stretch", reps: "1 min/side" },
+    { name: "Breathing Reset", reps: "2 min" }
   ],
 
   HIIT: [
-    { section: "HIIT Options" },
-    { name: "Tabata 20/10 x8", action: startTabata },
-    { name: "HIIT 30/30 x10", action: startHIIT3030 },
-    { name: "EMOM x10", action: startEMOM }
+    { section: "HIIT Option 1 – 30/30 Intervals" },
+    { name: "Jump Rope", reps: "30 sec work / 30 sec rest × 10 rounds" },
+
+    { section: "HIIT Option 2 – Tabata" },
+    { name: "Burpees", reps: "20 sec work / 10 sec rest × 8 rounds" },
+
+    { section: "HIIT Option 3 – Mixed Conditioning" },
+    { name: "Kettlebell Swings", reps: "30 sec" },
+    { name: "Mountain Climbers", reps: "30 sec" },
+    { name: "Rest", reps: "30 sec × 5 rounds" }
   ],
 
   MOBILITY: [
-    { section: "Full Mobility Session" },
+    { section: "Mobility Day (20–30 min)" },
+    { name: "90/90 Hip Mobility", reps: "1 min/side" },
     { name: "World’s Greatest Stretch", reps: "5/side" },
-    { name: "90/90 Hip Mobility", reps: "60 sec" },
-    { name: "Thoracic Rotation", reps: "8/side" },
-    { name: "Couch Stretch", reps: "60 sec/side" },
-    { name: "Breathing Reset", reps: "60 sec" }
+    { name: "Thoracic Rotation", reps: "10/side" },
+    { name: "Couch Stretch", reps: "1–2 min/side" },
+    { name: "Breathing Reset", reps: "3–5 min" }
   ]
 };
 
-/* ===================== RENDER ===================== */
 function loadWorkout(type) {
-  currentWorkout = type;
   const ul = document.getElementById("workout");
   ul.innerHTML = "";
+  let inBlock = false;
 
   workouts[type].forEach(item => {
     if (item.section) {
+      inBlock = false;
       const li = document.createElement("li");
-      li.textContent = item.section;
       li.className = "section";
+      li.textContent = item.section;
+      ul.appendChild(li);
+      return;
+    }
+
+    if (item.note) {
+      inBlock = true;
+      const li = document.createElement("li");
+      li.className = "block";
+      li.innerHTML = `<div class="blockNote">${item.note}</div>`;
       ul.appendChild(li);
       return;
     }
 
     const li = document.createElement("li");
+    li.className = inBlock ? "exercise sub" : "exercise";
     li.innerHTML = `
       <strong>${item.name}</strong>
-      ${item.sets ? `<div>${item.sets} × ${item.reps}</div>` : ""}
-      ${!item.sets && item.reps ? `<div>${item.reps}</div>` : ""}
-      ${item.note ? `<div style="opacity:.6">${item.note}</div>` : ""}
+      <div>${item.sets ? `${item.sets} × ${item.reps}` : item.reps}</div>
     `;
-    if (item.action) li.onclick = item.action;
     ul.appendChild(li);
   });
 }
 
-/* ===================== LOGGING ===================== */
-function logWorkout() {
-  if (!currentWorkout) return alert("Start a workout first");
-  const log = JSON.parse(localStorage.getItem("log")) || [];
-  log.push({ workout: currentWorkout, date: new Date().toLocaleString() });
-  localStorage.setItem("log", JSON.stringify(log));
-  updateLastWorkout();
-}
-
-function updateLastWorkout() {
-  const log = JSON.parse(localStorage.getItem("log")) || [];
-  if (!log.length) return;
-  const last = log[log.length - 1];
-  document.getElementById("lastWorkout").textContent =
-    `Last workout: ${last.workout} (${last.date})`;
-}
-
-updateLastWorkout();
-
-/* ===================== LIBRARY ===================== */
+/* EXERCISE LIBRARY */
 function openLibrary() {
   const list = document.getElementById("libraryList");
   list.innerHTML = "";
@@ -161,8 +147,3 @@ function openLibrary() {
 function closeLibrary() {
   document.getElementById("libraryModal").style.display = "none";
 }
-
-/* ===================== TIMER PLACEHOLDERS ===================== */
-function startTabata(){}
-function startHIIT3030(){}
-function startEMOM(){}
