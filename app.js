@@ -1,8 +1,25 @@
 let currentTime = 0;
 let timer = null;
+let activeElement = null;
 
 /* =====================
-   COOLDOWN LIBRARIES
+   AUDIO (BEEPS)
+===================== */
+
+const beepCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playBeep(freq = 1000, duration = 0.1) {
+  const osc = beepCtx.createOscillator();
+  const gain = beepCtx.createGain();
+  osc.connect(gain);
+  gain.connect(beepCtx.destination);
+  osc.frequency.value = freq;
+  osc.start();
+  osc.stop(beepCtx.currentTime + duration);
+}
+
+/* =====================
+   COOLDOWNS
 ===================== */
 
 const cooldownStrength = [
@@ -31,174 +48,111 @@ const cooldownMobility = [
 ];
 
 /* =====================
-   WORKOUT DEFINITIONS
+   WORKOUT DATA
 ===================== */
 
 const workouts = {
-
   A: {
     sections: [
-      {
-        title: "Warm-Up",
-        items: [
-          { name: "Jump Rope / March", time: 60 },
-          { name: "World’s Greatest Stretch", time: 45 },
-          { name: "KB Halos", time: 30 }
-        ]
-      },
-      {
-        title: "Main Lifts",
-        items: [
-          { name: "Back Squat – 4×5", time: 90 },
-          { name: "Bench Press – 4×8", time: 90 }
-        ]
-      },
-      {
-        title: "Kettlebell Volume / Finisher",
-        items: [
-          { name: "KB Goblet Squat – 3×12", time: 60 },
-          { name: "KB Push Press – 3×8/side", time: 60 }
-        ]
-      },
-      {
-        title: "Cool Down",
-        items: cooldownStrength
-      }
+      { title: "Warm-Up", items: [
+        { name: "Jump Rope / March", time: 60 },
+        { name: "World’s Greatest Stretch", time: 45 },
+        { name: "KB Halos", time: 30 }
+      ]},
+      { title: "Main Lifts", items: [
+        { name: "Back Squat – 4×5", time: 90 },
+        { name: "Bench Press – 4×8", time: 90 }
+      ]},
+      { title: "Kettlebell Volume / Finisher", items: [
+        { name: "KB Goblet Squat – 3×12", time: 60 },
+        { name: "KB Push Press – 3×8/side", time: 60 }
+      ]},
+      { title: "Cool Down", items: cooldownStrength }
     ]
   },
 
   B: {
     sections: [
-      {
-        title: "Warm-Up",
-        items: [
-          { name: "Row / Bike Easy", time: 60 },
-          { name: "Hip Openers", time: 45 },
-          { name: "Glute Bridges", time: 45 }
-        ]
-      },
-      {
-        title: "Main Lifts",
-        items: [
-          { name: "Deadlift – 4×5", time: 120 },
-          { name: "Pull-Ups – 4×8", time: 90 }
-        ]
-      },
-      {
-        title: "Kettlebell Volume / Finisher",
-        items: [
-          { name: "KB Swings – 10×15", time: 45 }
-        ]
-      },
-      {
-        title: "Cool Down",
-        items: cooldownStrength
-      }
+      { title: "Warm-Up", items: [
+        { name: "Row / Bike Easy", time: 60 },
+        { name: "Hip Openers", time: 45 },
+        { name: "Glute Bridges", time: 45 }
+      ]},
+      { title: "Main Lifts", items: [
+        { name: "Deadlift – 4×5", time: 120 },
+        { name: "Pull-Ups – 4×8", time: 90 }
+      ]},
+      { title: "Kettlebell Volume / Finisher", items: [
+        { name: "KB Swings – 10×15", time: 45 }
+      ]},
+      { title: "Cool Down", items: cooldownStrength }
     ]
   },
 
   C: {
     sections: [
-      {
-        title: "Warm-Up",
-        items: [
-          { name: "Jump Rope / Shadow Box", time: 60 },
-          { name: "Thoracic Rotations", time: 45 },
-          { name: "KB Halos", time: 30 }
-        ]
-      },
-      {
-        title: "Main Lifts",
-        items: [
-          { name: "Clean & Press – 5×3", time: 90 },
-          { name: "Front Squat – 4×6", time: 90 }
-        ]
-      },
-      {
-        title: "Kettlebell Volume / Finisher",
-        items: [
-          { name: "KB Rows – 4×12", time: 60 },
-          { name: "KB Lunges – 3×10/side", time: 60 }
-        ]
-      },
-      {
-        title: "Cool Down",
-        items: cooldownStrength
-      }
+      { title: "Warm-Up", items: [
+        { name: "Jump Rope / Shadow Box", time: 60 },
+        { name: "Thoracic Rotations", time: 45 },
+        { name: "KB Halos", time: 30 }
+      ]},
+      { title: "Main Lifts", items: [
+        { name: "Clean & Press – 5×3", time: 90 },
+        { name: "Front Squat – 4×6", time: 90 }
+      ]},
+      { title: "Kettlebell Volume / Finisher", items: [
+        { name: "KB Rows – 4×12", time: 60 },
+        { name: "KB Lunges – 3×10/side", time: 60 }
+      ]},
+      { title: "Cool Down", items: cooldownStrength }
     ]
   },
 
   MOB: {
     sections: [
-      {
-        title: "Mobility Flow",
-        items: [
-          { name: "Breathing Reset", time: 120 },
-          { name: "Cat–Cow", time: 60 },
-          { name: "World’s Greatest Stretch", time: 60 },
-          { name: "90/90 Hip Rotations", time: 60 },
-          { name: "Deep Squat Hold + Pry", time: 90 },
-          { name: "Thoracic Rotations", time: 60 },
-          { name: "Shoulder CARs", time: 60 }
-        ]
-      },
-      {
-        title: "Cool Down",
-        items: cooldownMobility
-      }
+      { title: "Mobility Flow", items: [
+        { name: "Breathing Reset", time: 120 },
+        { name: "Cat–Cow", time: 60 },
+        { name: "World’s Greatest Stretch", time: 60 },
+        { name: "90/90 Hip Rotations", time: 60 },
+        { name: "Deep Squat Hold + Pry", time: 90 },
+        { name: "Thoracic Rotations", time: 60 },
+        { name: "Shoulder CARs", time: 60 }
+      ]},
+      { title: "Cool Down", items: cooldownMobility }
     ]
   },
-
-  /* =====================
-     CARDIO – HIIT (3 OPTIONS)
-  ===================== */
 
   HIIT: {
     sections: [
       {
-        title: "HIIT Option 1 – Classic Intervals",
+        title: "HIIT Option 1 – Intervals",
         items: [
-          { name: "Warm-Up: Easy Cardio", time: 180 },
-          { name: "30s Hard / 30s Easy × 10", time: 600 }
+          { name: "30s Hard / 30s Easy × 10", time: 600, interval: 30 }
         ]
       },
       {
         title: "HIIT Option 2 – Tabata",
         items: [
-          { name: "Warm-Up: Dynamic Movement", time: 180 },
-          { name: "20s On / 10s Off × 8 (2–3 Rounds)", time: 480 }
+          { name: "20s On / 10s Off × 8 (2–3 Rounds)", time: 480, interval: 20 }
         ]
       },
       {
         title: "HIIT Option 3 – EMOM",
         items: [
-          { name: "Warm-Up: Light KB + Mobility", time: 180 },
-          { name: "EMOM 12–15 min (Swings / Push-Ups / Squats)", time: 900 }
+          { name: "EMOM 12–15 min", time: 900, interval: 60 }
         ]
       },
-      {
-        title: "Cool Down",
-        items: cooldownHIIT
-      }
+      { title: "Cool Down", items: cooldownHIIT }
     ]
   },
 
-  /* =====================
-     CARDIO – LOW INTENSITY
-  ===================== */
-
   LOW: {
     sections: [
-      {
-        title: "Low-Intensity Cardio (KISS)",
-        items: [
-          { name: "Incline Walk / Easy Bike", time: 1200 }
-        ]
-      },
-      {
-        title: "Cool Down",
-        items: cooldownLow
-      }
+      { title: "Low-Intensity Cardio (KISS)", items: [
+        { name: "Incline Walk / Easy Bike", time: 1200 }
+      ]},
+      { title: "Cool Down", items: cooldownLow }
     ]
   }
 };
@@ -210,6 +164,7 @@ const workouts = {
 function loadWorkout(key) {
   const ul = document.getElementById("workout");
   ul.innerHTML = "";
+  activeElement = null;
 
   workouts[key].sections.forEach(section => {
     const header = document.createElement("li");
@@ -219,25 +174,45 @@ function loadWorkout(key) {
     section.items.forEach(ex => {
       const li = document.createElement("li");
       li.innerHTML = `${ex.name}<br>⏱ ${ex.time}s`;
-      li.onclick = () => setTimer(ex.time);
+
+      li.onclick = () => {
+        setTimer(ex.time, ex.interval || null, li);
+      };
+
       ul.appendChild(li);
     });
   });
 }
 
-function setTimer(seconds) {
+function setTimer(seconds, interval = null, element = null) {
   currentTime = seconds;
+  currentInterval = interval;
   updateTimer();
+
+  if (activeElement) activeElement.classList.remove("active");
+  activeElement = element;
+  if (activeElement) activeElement.classList.add("active");
 }
+
+let currentInterval = null;
 
 function startTimer() {
   if (timer) return;
+
+  let lastInterval = currentTime;
+
   timer = setInterval(() => {
     if (currentTime > 0) {
       currentTime--;
       updateTimer();
-      if (currentTime === 0) navigator.vibrate?.(300);
-    } else pauseTimer();
+
+      if (currentInterval && currentTime % currentInterval === 0) {
+        playBeep(1200, 0.08);
+      }
+    } else {
+      playBeep(400, 0.4);
+      pauseTimer();
+    }
   }, 1000);
 }
 
