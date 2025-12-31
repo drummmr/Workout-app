@@ -1,10 +1,8 @@
 let timer = null;
-let displayTime = 0;
 let activeElement = null;
 
-/* =====================
-   AUDIO
-===================== */
+/* ================= AUDIO ================= */
+
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function beep(freq = 1000, duration = 0.15) {
@@ -17,155 +15,13 @@ function beep(freq = 1000, duration = 0.15) {
   osc.stop(audioCtx.currentTime + duration);
 }
 
-/* =====================
-   INTERVAL DEFINITIONS
-===================== */
+/* ================= UI HELPERS ================= */
 
-const intervalTypes = {
-  intervals30: { pattern: [30, 30] }, // work/rest
-  tabata: { pattern: [20, 10] },
-  emom: { pattern: [60] }
-};
-
-/* =====================
-   COOLDOWNS
-===================== */
-
-const cooldownHIIT = [
-  { name: "Slow Walk / Easy Spin", time: 180 },
-  { name: "Deep Nasal Breathing", time: 120 }
-];
-
-/* =====================
-   WORKOUT DATA (HIIT ONLY SHOWN — OTHERS UNCHANGED)
-===================== */
-
-const workouts = {
-  HIIT: {
-    sections: [
-      {
-        title: "HIIT Option 1 – 30 / 30 Intervals",
-        items: [
-          { name: "30s Hard / 30s Easy × 10", total: 600, type: "intervals30" }
-        ]
-      },
-      {
-        title: "HIIT Option 2 – Tabata",
-        items: [
-          { name: "20s On / 10s Off × 8 (2–3 Rounds)", total: 480, type: "tabata" }
-        ]
-      },
-      {
-        title: "HIIT Option 3 – EMOM",
-        items: [
-          { name: "EMOM 12–15 min", total: 900, type: "emom" }
-        ]
-      },
-      {
-        title: "Cool Down",
-        items: cooldownHIIT
-      }
-    ]
-  }
-};
-
-/* =====================
-   LOAD WORKOUT
-===================== */
-
-function loadWorkout(key) {
-  const ul = document.getElementById("workout");
-  ul.innerHTML = "";
-  activeElement = null;
-
-  workouts[key].sections.forEach(section => {
-    const header = document.createElement("li");
-    header.innerHTML = `<strong>${section.title}</strong>`;
-    ul.appendChild(header);
-
-    section.items.forEach(ex => {
-      const li = document.createElement("li");
-      li.innerHTML = `${ex.name}<br>⏱ ${ex.total || ex.time}s`;
-
-      li.onclick = () => {
-        if (ex.type) {
-          startIntervalWorkout(ex, li);
-        } else {
-          startSimpleTimer(ex.time, li);
-        }
-      };
-
-      ul.appendChild(li);
-    });
-  });
-}
-
-/* =====================
-   SIMPLE TIMER (NON-HIIT)
-===================== */
-
-function startSimpleTimer(seconds, element) {
-  stopTimer();
-  highlight(element);
-
-  displayTime = seconds;
-  updateDisplay();
-
-  timer = setInterval(() => {
-    displayTime--;
-    updateDisplay();
-
-    if (displayTime <= 0) {
-      beep(400, 0.4);
-      stopTimer();
-    }
-  }, 1000);
-}
-
-/* =====================
-   INTERVAL TIMER (THE FIX)
-===================== */
-
-function startIntervalWorkout(config, element) {
-  stopTimer();
-  highlight(element);
-
-  const pattern = intervalTypes[config.type].pattern;
-  let patternIndex = 0;
-  let segmentTime = pattern[0];
-  let remainingTotal = config.total;
-
-  displayTime = remainingTotal;
-  updateDisplay();
-
-  beep(1400, 0.2); // start beep
-
-  timer = setInterval(() => {
-    segmentTime--;
-    remainingTotal--;
-    displayTime = remainingTotal;
-    updateDisplay();
-
-    if (segmentTime === 0 && remainingTotal > 0) {
-      beep(1200, 0.15);
-      patternIndex = (patternIndex + 1) % pattern.length;
-      segmentTime = pattern[patternIndex];
-    }
-
-    if (remainingTotal <= 0) {
-      beep(400, 0.5);
-      stopTimer();
-    }
-  }, 1000);
-}
-
-/* =====================
-   HELPERS
-===================== */
-
-function stopTimer() {
-  clearInterval(timer);
-  timer = null;
+function updateDisplay(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  document.getElementById("time").textContent =
+    String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
 }
 
 function highlight(el) {
@@ -174,9 +30,195 @@ function highlight(el) {
   activeElement.classList.add("active");
 }
 
-function updateDisplay() {
-  const m = Math.floor(displayTime / 60);
-  const s = displayTime % 60;
-  document.getElementById("time").textContent =
-    String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+function setPhase(label, type) {
+  const el = document.getElementById("phaseLabel");
+  el.textContent = label;
+  el.className = "";
+  el.classList.add(`phase-${type}`);
+}
+
+function clearPhase() {
+  document.getElementById("phaseLabel").textContent = "";
+  document.getElementById("phaseLabel").className = "";
+}
+
+function setProgress(text) {
+  document.getElementById("progressLabel").textContent = text;
+}
+
+function clearProgress() {
+  document.getElementById("progressLabel").textContent = "";
+}
+
+function stopTimer() {
+  clearInterval(timer);
+  timer = null;
+}
+
+/* ================= WORKOUT DATA ================= */
+
+const workouts = {
+  HIIT: {
+    sections: [
+      {
+        title: "HIIT Option 1 – 30 / 30",
+        items: [{ name: "30s Work / 30s Rest × 10", type: "3030" }]
+      },
+      {
+        title: "HIIT Option 2 – Tabata",
+        items: [{ name: "20s / 10s × 8", type: "tabata" }]
+      },
+      {
+        title: "HIIT Option 3 – EMOM",
+        items: [{ name: "EMOM 12 min", type: "emom" }]
+      }
+    ]
+  }
+};
+
+/* ================= LOAD WORKOUT ================= */
+
+function loadWorkout(key) {
+  const ul = document.getElementById("workout");
+  ul.innerHTML = "";
+
+  workouts[key].sections.forEach(section => {
+    const header = document.createElement("li");
+    header.innerHTML = `<strong>${section.title}</strong>`;
+    ul.appendChild(header);
+
+    section.items.forEach(ex => {
+      const li = document.createElement("li");
+      li.textContent = ex.name;
+
+      li.onclick = () => {
+        if (ex.type === "3030") startHIIT3030(li);
+        if (ex.type === "tabata") startTabata(li);
+        if (ex.type === "emom") startEMOM(li, 12);
+      };
+
+      ul.appendChild(li);
+    });
+  });
+}
+
+/* ================= HIIT 30 / 30 ================= */
+
+function startHIIT3030(element, rounds = 10) {
+  stopTimer();
+  highlight(element);
+
+  let phase = "work";
+  let timeLeft = 30;
+  let currentRound = 1;
+
+  setPhase("WORK", "work");
+  setProgress(`Round ${currentRound} of ${rounds}`);
+  updateDisplay(timeLeft);
+  beep();
+
+  timer = setInterval(() => {
+    timeLeft--;
+    updateDisplay(timeLeft);
+
+    if (timeLeft <= 0) {
+      beep();
+      if (phase === "work") {
+        phase = "rest";
+        setPhase("REST", "rest");
+        timeLeft = 30;
+      } else {
+        currentRound++;
+        if (currentRound > rounds) {
+          beep(400, 0.5);
+          clearPhase();
+          clearProgress();
+          stopTimer();
+          return;
+        }
+        setProgress(`Round ${currentRound} of ${rounds}`);
+        phase = "work";
+        setPhase("WORK", "work");
+        timeLeft = 30;
+      }
+    }
+  }, 1000);
+}
+
+/* ================= TABATA ================= */
+
+function startTabata(element) {
+  stopTimer();
+  highlight(element);
+
+  let totalRounds = 8;
+  let currentRound = 1;
+  let phase = "work";
+  let timeLeft = 20;
+
+  setPhase("WORK", "work");
+  setProgress(`Round ${currentRound} of ${totalRounds}`);
+  updateDisplay(timeLeft);
+  beep();
+
+  timer = setInterval(() => {
+    timeLeft--;
+    updateDisplay(timeLeft);
+
+    if (timeLeft <= 0) {
+      beep();
+      if (phase === "work") {
+        phase = "rest";
+        setPhase("REST", "rest");
+        timeLeft = 10;
+      } else {
+        currentRound++;
+        if (currentRound > totalRounds) {
+          beep(400, 0.5);
+          clearPhase();
+          clearProgress();
+          stopTimer();
+          return;
+        }
+        setProgress(`Round ${currentRound} of ${totalRounds}`);
+        phase = "work";
+        setPhase("WORK", "work");
+        timeLeft = 20;
+      }
+    }
+  }, 1000);
+}
+
+/* ================= EMOM ================= */
+
+function startEMOM(element, minutes = 12) {
+  stopTimer();
+  highlight(element);
+
+  let currentMinute = 1;
+  let timeLeft = 60;
+
+  setPhase("EMOM", "emom");
+  setProgress(`Minute ${currentMinute} of ${minutes}`);
+  updateDisplay(timeLeft);
+  beep();
+
+  timer = setInterval(() => {
+    timeLeft--;
+    updateDisplay(timeLeft);
+
+    if (timeLeft <= 0) {
+      beep();
+      currentMinute++;
+      if (currentMinute > minutes) {
+        beep(400, 0.5);
+        clearPhase();
+        clearProgress();
+        stopTimer();
+        return;
+      }
+      setProgress(`Minute ${currentMinute} of ${minutes}`);
+      timeLeft = 60;
+    }
+  }, 1000);
 }
