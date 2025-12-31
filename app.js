@@ -1,3 +1,50 @@
+/**********************
+ AUDIO
+**********************/
+let timer = null;
+let soundEnabled = false;
+let audioCtx = null;
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  if (soundEnabled && !audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  alert(soundEnabled ? "Sound enabled" : "Sound muted");
+}
+
+function beep(freq = 1200, dur = 0.15) {
+  if (!soundEnabled || !audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.frequency.value = freq;
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+  osc.stop(audioCtx.currentTime + dur);
+}
+
+/**********************
+ TIMER HELPERS
+**********************/
+function updateTimer(sec) {
+  document.getElementById("timer").textContent =
+    `${Math.floor(sec / 60).toString().padStart(2, "0")}:${(sec % 60)
+      .toString()
+      .padStart(2, "0")}`;
+}
+
+function stopTimer() {
+  clearInterval(timer);
+  timer = null;
+  document.getElementById("phaseLabel").textContent = "READY";
+  document.querySelectorAll(".exercise").forEach(e => e.classList.remove("active"));
+}
+
+/**********************
+ WORKOUT DATA (RESTORED)
+**********************/
 const workouts = {
   A: [
     { section: "Warm-Up (5–7 min)" },
@@ -70,12 +117,12 @@ const workouts = {
 
   HIIT: [
     { section: "HIIT Option 1 – 30/30 Intervals" },
-    { name: "Jump Rope", reps: "30 sec work / 30 sec rest × 10 rounds" },
+    { name: "Jump Rope", reps: "30s work / 30s rest × 10 rounds" },
 
     { section: "HIIT Option 2 – Tabata" },
-    { name: "Burpees", reps: "20 sec work / 10 sec rest × 8 rounds" },
+    { name: "Burpees", reps: "20s work / 10s rest × 8 rounds" },
 
-    { section: "HIIT Option 3 – Mixed Conditioning" },
+    { section: "HIIT Option 3 – Mixed" },
     { name: "Kettlebell Swings", reps: "30 sec" },
     { name: "Mountain Climbers", reps: "30 sec" },
     { name: "Rest", reps: "30 sec × 5 rounds" }
@@ -91,7 +138,11 @@ const workouts = {
   ]
 };
 
+/**********************
+ RENDER WORKOUT
+**********************/
 function loadWorkout(type) {
+  stopTimer();
   const ul = document.getElementById("workout");
   ul.innerHTML = "";
   let inBlock = false;
@@ -125,19 +176,28 @@ function loadWorkout(type) {
   });
 }
 
-/* EXERCISE LIBRARY */
+/**********************
+ EXERCISE LIBRARY (WITH LINKS)
+**********************/
+const videoMap = {
+  "Barbell Back Squat": "https://youtu.be/SW_C1A-rejs",
+  "Deadlift": "https://youtu.be/op9kVnSso6Q",
+  "Kettlebell Swings": "https://youtu.be/YSxHifyI6s8",
+  "Goblet Squat": "https://youtu.be/6xwGFn-J_QA",
+  "Single-Arm KB Overhead Press": "https://youtu.be/spkG8z6p0oQ",
+  "Burpees": "https://youtu.be/TU8QYVW0gDU",
+  "World’s Greatest Stretch": "https://youtu.be/Fsa_CjlT6IY",
+  "90/90 Hip Mobility": "https://youtu.be/2uYJZfB3k_U",
+  "Breathing Reset": "https://youtu.be/8TuRYV71Rgo"
+};
+
 function openLibrary() {
   const list = document.getElementById("libraryList");
   list.innerHTML = "";
-  const set = new Set();
 
-  Object.values(workouts).forEach(day =>
-    day.forEach(item => item.name && set.add(item.name))
-  );
-
-  [...set].sort().forEach(name => {
+  Object.entries(videoMap).forEach(([name, url]) => {
     const li = document.createElement("li");
-    li.textContent = name;
+    li.innerHTML = `<a href="${url}" target="_blank">${name}</a>`;
     list.appendChild(li);
   });
 
