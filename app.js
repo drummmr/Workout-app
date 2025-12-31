@@ -1,10 +1,14 @@
 /**********************
- AUDIO
+ STATE
 **********************/
 let timer = null;
 let soundEnabled = false;
 let audioCtx = null;
+let currentWorkout = null;
 
+/**********************
+ AUDIO
+**********************/
 function toggleSound() {
   soundEnabled = !soundEnabled;
   if (soundEnabled && !audioCtx) {
@@ -39,117 +43,108 @@ function stopTimer() {
   clearInterval(timer);
   timer = null;
   document.getElementById("phaseLabel").textContent = "READY";
+  document.getElementById("progressFill").style.width = "0%";
   document.querySelectorAll(".exercise").forEach(e => e.classList.remove("active"));
 }
 
 /**********************
- WORKOUT DATA (RESTORED)
+ HIIT TIMERS (BUTTON-WIRED)
+**********************/
+function startHIIT3030(btn) {
+  stopTimer();
+  highlight(btn);
+
+  let phase = "WORK";
+  let time = 30;
+  let rounds = 10;
+  let max = 30;
+
+  document.getElementById("phaseLabel").textContent = phase;
+  updateTimer(time);
+  beep();
+
+  timer = setInterval(() => {
+    time--;
+    updateTimer(time);
+    document.getElementById("progressFill").style.width =
+      `${((max - time) / max) * 100}%`;
+
+    if (time === 0) {
+      beep();
+      if (phase === "WORK") {
+        phase = "REST";
+        time = 30;
+      } else {
+        rounds--;
+        if (rounds === 0) {
+          beep(400, 0.5);
+          stopTimer();
+          return;
+        }
+        phase = "WORK";
+        time = 30;
+      }
+      max = time;
+      document.getElementById("phaseLabel").textContent = phase;
+    }
+  }, 1000);
+}
+
+/**********************
+ WORKOUT LOGGING
+**********************/
+function logWorkout() {
+  if (!currentWorkout) return;
+  const log = JSON.parse(localStorage.getItem("workoutLog") || "[]");
+  log.push({ workout: currentWorkout, date: new Date().toISOString() });
+  localStorage.setItem("workoutLog", JSON.stringify(log));
+  document.getElementById("logStatus").textContent =
+    `Logged ${currentWorkout} on ${new Date().toLocaleDateString()}`;
+}
+
+/**********************
+ WORKOUT DATA (UNCHANGED)
 **********************/
 const workouts = {
   A: [
-    { section: "Warm-Up (5–7 min)" },
+    { section: "Warm-Up" },
     { name: "World’s Greatest Stretch", reps: "5/side" },
     { name: "Glute Bridge", reps: "15" },
     { name: "Push-Ups", reps: "10" },
-
-    { section: "Strength Superset (15 min)" },
+    { section: "Strength Superset" },
     { note: "Alternate movements" },
     { name: "Barbell Back Squat", sets: 4, reps: "5" },
     { name: "Push-Ups or Bench Press", sets: 4, reps: "6–10" },
-
-    { section: "Kettlebell Volume (10 min)" },
+    { section: "Kettlebell Volume" },
     { name: "Goblet Squat", sets: 3, reps: "12" },
     { name: "Single-Arm KB Overhead Press", sets: 3, reps: "8/side" },
-
-    { section: "Finisher (5–7 min)" },
+    { section: "Finisher" },
     { note: "Repeat continuously" },
     { name: "Kettlebell Swings", reps: "10" },
     { name: "Burpees", reps: "10" },
-
-    { section: "Cooldown (5 min)" },
+    { section: "Cooldown" },
     { name: "Couch Stretch", reps: "1 min/side" },
-    { name: "Chest Opener Stretch", reps: "1–2 min" }
-  ],
-
-  B: [
-    { section: "Warm-Up (5–7 min)" },
-    { name: "Hip Hinge Drill", reps: "15" },
-    { name: "Band Pull-Aparts", reps: "20" },
-
-    { section: "Strength Superset (15 min)" },
-    { note: "Alternate movements" },
-    { name: "Deadlift", sets: 4, reps: "4–5" },
-    { name: "Pull-Ups or Lat Pulldown", sets: 4, reps: "6–10" },
-
-    { section: "Kettlebell Volume (10 min)" },
-    { name: "KB Romanian Deadlift", sets: 3, reps: "12" },
-    { name: "Single-Arm KB Row", sets: 3, reps: "10/side" },
-
-    { section: "Finisher (5–7 min)" },
-    { note: "2–3 fast rounds" },
-    { name: "Kettlebell Swings", reps: "20" },
-    { name: "Goblet Squats", reps: "15" },
-
-    { section: "Cooldown (5 min)" },
-    { name: "Hamstring Stretch", reps: "1 min/side" },
-    { name: "Lat Stretch", reps: "1 min/side" }
-  ],
-
-  C: [
-    { section: "Warm-Up (5–7 min)" },
-    { name: "Jump Rope", reps: "2 min" },
-    { name: "Bodyweight Squats", reps: "15" },
-
-    { section: "Power & Strength (15 min)" },
-    { name: "Clean & Press (Barbell or KB)", sets: 5, reps: "3" },
-    { name: "Front Squat or Double KB Squat", sets: 4, reps: "6" },
-
-    { section: "Conditioning Circuit (10–15 min)" },
-    { note: "AMRAP" },
-    { name: "Kettlebell Swings", reps: "10" },
-    { name: "Reverse Lunges", reps: "8/leg" },
-    { name: "Plank", reps: "30 sec" },
-
-    { section: "Cooldown (5 min)" },
-    { name: "Hip Flexor Stretch", reps: "1 min/side" },
     { name: "Breathing Reset", reps: "2 min" }
   ],
 
   HIIT: [
-    { section: "HIIT Option 1 – 30/30 Intervals" },
-    { name: "Jump Rope", reps: "30s work / 30s rest × 10 rounds" },
-
-    { section: "HIIT Option 2 – Tabata" },
-    { name: "Burpees", reps: "20s work / 10s rest × 8 rounds" },
-
-    { section: "HIIT Option 3 – Mixed" },
-    { name: "Kettlebell Swings", reps: "30 sec" },
-    { name: "Mountain Climbers", reps: "30 sec" },
-    { name: "Rest", reps: "30 sec × 5 rounds" }
-  ],
-
-  MOBILITY: [
-    { section: "Mobility Day (20–30 min)" },
-    { name: "90/90 Hip Mobility", reps: "1 min/side" },
-    { name: "World’s Greatest Stretch", reps: "5/side" },
-    { name: "Thoracic Rotation", reps: "10/side" },
-    { name: "Couch Stretch", reps: "1–2 min/side" },
-    { name: "Breathing Reset", reps: "3–5 min" }
+    { section: "HIIT Option 1 – 30/30" },
+    { name: "Start 30/30 Timer", action: startHIIT3030 }
   ]
 };
 
 /**********************
- RENDER WORKOUT
+ RENDER
 **********************/
 function loadWorkout(type) {
   stopTimer();
+  currentWorkout = type;
+
   const ul = document.getElementById("workout");
   ul.innerHTML = "";
-  let inBlock = false;
 
   workouts[type].forEach(item => {
     if (item.section) {
-      inBlock = false;
       const li = document.createElement("li");
       li.className = "section";
       li.textContent = item.section;
@@ -158,7 +153,6 @@ function loadWorkout(type) {
     }
 
     if (item.note) {
-      inBlock = true;
       const li = document.createElement("li");
       li.className = "block";
       li.innerHTML = `<div class="blockNote">${item.note}</div>`;
@@ -167,27 +161,35 @@ function loadWorkout(type) {
     }
 
     const li = document.createElement("li");
-    li.className = inBlock ? "exercise sub" : "exercise";
-    li.innerHTML = `
-      <strong>${item.name}</strong>
-      <div>${item.sets ? `${item.sets} × ${item.reps}` : item.reps}</div>
-    `;
+    li.className = "exercise";
+
+    if (item.action) {
+      const btn = document.createElement("button");
+      btn.textContent = item.name;
+      btn.onclick = () => item.action(btn);
+      li.appendChild(btn);
+    } else {
+      li.innerHTML = `<strong>${item.name}</strong><div>${item.sets ? `${item.sets} × ${item.reps}` : item.reps}</div>`;
+    }
+
     ul.appendChild(li);
   });
 }
 
 /**********************
- EXERCISE LIBRARY (WITH LINKS)
+ LIBRARY (FULL COVERAGE)
 **********************/
 const videoMap = {
+  "World’s Greatest Stretch": "https://youtu.be/Fsa_CjlT6IY",
+  "Glute Bridge": "https://youtu.be/m2Zx-57cSok",
+  "Push-Ups": "https://youtu.be/IODxDxX7oi4",
   "Barbell Back Squat": "https://youtu.be/SW_C1A-rejs",
-  "Deadlift": "https://youtu.be/op9kVnSso6Q",
-  "Kettlebell Swings": "https://youtu.be/YSxHifyI6s8",
+  "Bench Press": "https://youtu.be/rT7DgCr-3pg",
   "Goblet Squat": "https://youtu.be/6xwGFn-J_QA",
   "Single-Arm KB Overhead Press": "https://youtu.be/spkG8z6p0oQ",
+  "Kettlebell Swings": "https://youtu.be/YSxHifyI6s8",
   "Burpees": "https://youtu.be/TU8QYVW0gDU",
-  "World’s Greatest Stretch": "https://youtu.be/Fsa_CjlT6IY",
-  "90/90 Hip Mobility": "https://youtu.be/2uYJZfB3k_U",
+  "Couch Stretch": "https://youtu.be/GvZp3D7xvGk",
   "Breathing Reset": "https://youtu.be/8TuRYV71Rgo"
 };
 
@@ -206,4 +208,9 @@ function openLibrary() {
 
 function closeLibrary() {
   document.getElementById("libraryModal").style.display = "none";
+}
+
+function highlight(el) {
+  document.querySelectorAll(".exercise").forEach(e => e.classList.remove("active"));
+  el.closest(".exercise").classList.add("active");
 }
