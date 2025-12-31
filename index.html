@@ -1,33 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workout App</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<h1>Workout App</h1>
+  <h1>Today’s Workout</h1>
 
-<div class="buttons">
-  <button onclick="loadWorkout('A')">Workout A</button>
-  <button onclick="loadWorkout('B')">Workout B</button>
-  <button onclick="loadWorkout('C')">Workout C</button>
-  <button onclick="loadWorkout('MOB')">Mobility</button>
-  <button onclick="loadWorkout('HIIT')">Cardio HIIT</button>
-  <button onclick="loadWorkout('LOW')">Cardio Low Intensity</button>
-</div>
+  <div class="buttons">
+    <button onclick="loadWorkout('A')">Workout A</button>
+    <button onclick="loadWorkout('B')">Workout B</button>
+    <button onclick="loadWorkout('C')">Workout C</button>
+    <button onclick="loadWorkout('HIIT')">Cardio HIIT</button>
+    <button onclick="loadWorkout('LOW')">Cardio Low</button>
+    <button onclick="loadWorkout('MOBILITY')">Mobility</button>
+  </div>
 
-<ul id="workout"></ul>
+  <ul id="workout"></ul>
 
-<div class="timer">
-  <h2 id="time">00:00</h2>
-  <button onclick="startTimer()">▶ Start</button>
-  <button onclick="pauseTimer()">⏸ Pause</button>
-  <button onclick="resetTimer()">🔁 Reset</button>
-</div>
+  <div class="timer">
+    <div id="phaseLabel"></div>
+    <div id="progressLabel"></div>
+    <h2 id="time">00:00</h2>
+    <div>
+      <button onclick="stopTimer()">Stop</button>
+    </div>
+  </div>
 
-<script src="app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
