@@ -7,6 +7,7 @@ body {
 
 h1 {
   text-align: center;
+  margin-bottom: 12px;
 }
 
 button {
@@ -43,8 +44,10 @@ li {
   border-radius: 12px;
 }
 
-li.active {
-  outline: 2px solid #4da3ff;
+li.section {
+  background: #0f0f0f;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .timer {
@@ -54,6 +57,7 @@ li.active {
 
 #time {
   font-size: 48px;
+  margin: 8px 0;
 }
 
 #phaseLabel {
@@ -61,13 +65,8 @@ li.active {
   font-weight: 700;
 }
 
-#phaseLabel.work {
-  color: #4caf50;
-}
-
-#phaseLabel.rest {
-  color: #ff5252;
-}
+#phaseLabel.work { color: #4caf50; }
+#phaseLabel.rest { color: #ff5252; }
 
 .logBox {
   margin-top: 16px;
@@ -90,6 +89,7 @@ li.active {
   inset: 0;
   background: rgba(0,0,0,.85);
   display: none;
+  z-index: 999;
 }
 
 .libraryContent {
