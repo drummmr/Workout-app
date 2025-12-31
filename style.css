@@ -1,14 +1,14 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #0e0e0e;
-  color: #ffffff;
+  background: #0b0b0b;
+  color: #fff;
 }
 
 header {
   padding: 16px;
   text-align: center;
-  background: #121212;
+  background: #111;
 }
 
 nav {
@@ -21,23 +21,42 @@ nav {
 
 button {
   background: #1f1f1f;
-  color: #ffffff;
+  color: #fff;
   border: none;
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 14px;
 }
 
-ul {
-  list-style: none;
+#timerPanel {
+  text-align: center;
   padding: 12px;
 }
 
+#timer {
+  font-size: 48px;
+  font-weight: bold;
+  margin: 6px 0;
+}
+
+#phaseLabel {
+  font-size: 14px;
+  opacity: 0.7;
+  letter-spacing: 1px;
+}
+
+#progress {
+  height: 6px;
+  background: #333;
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
 .section {
+  margin-top: 18px;
   font-weight: 600;
-  margin-top: 20px;
-  margin-bottom: 6px;
-  opacity: 0.85;
+  opacity: 0.8;
 }
 
 .exercise {
@@ -47,22 +66,25 @@ ul {
   margin-bottom: 6px;
 }
 
+.exercise.active {
+  border: 2px solid #4caf50;
+}
+
 .exercise.sub {
   margin-left: 14px;
-  background: #1c1c1c;
   border-left: 3px solid #4caf50;
 }
 
 .block {
-  background: #0f0f0f;
-  padding: 8px 10px;
+  background: #101010;
+  padding: 8px;
   border-radius: 8px;
   margin-bottom: 6px;
 }
 
 .blockNote {
-  font-size: 13px;
-  opacity: 0.65;
+  font-size: 12px;
+  opacity: 0.6;
   text-transform: uppercase;
 }
 
@@ -70,12 +92,12 @@ ul {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.85);
+  background: rgba(0,0,0,.9);
 }
 
 .modalContent {
   background: #121212;
-  margin: 10%;
+  margin: 8%;
   padding: 20px;
   border-radius: 12px;
 }
