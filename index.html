@@ -24,7 +24,7 @@
 <section id="timerPanel">
   <div id="phaseLabel">READY</div>
   <div id="timer">00:00</div>
-  <div id="progress"></div>
+  <div id="progressBar"><div id="progressFill"></div></div>
   <button onclick="toggleSound()">🔊 Enable Sound</button>
   <button onclick="stopTimer()">⏹ Stop</button>
 </section>
@@ -32,6 +32,11 @@
 <main>
   <ul id="workout"></ul>
 </main>
+
+<div id="logPanel">
+  <button onclick="logWorkout()">✅ Log Workout</button>
+  <div id="logStatus"></div>
+</div>
 
 <div id="libraryModal" class="modal">
   <div class="modalContent">
