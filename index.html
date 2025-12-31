@@ -8,28 +8,42 @@
 </head>
 <body>
 
-  <h1>Today’s Workout</h1>
+<h1>Today’s Workout</h1>
 
-  <div class="buttons">
-    <button onclick="loadWorkout('A')">Workout A</button>
-    <button onclick="loadWorkout('B')">Workout B</button>
-    <button onclick="loadWorkout('C')">Workout C</button>
-    <button onclick="loadWorkout('HIIT')">Cardio HIIT</button>
-    <button onclick="loadWorkout('LOW')">Cardio Low</button>
-    <button onclick="loadWorkout('MOBILITY')">Mobility</button>
+<button id="soundBtn" onclick="enableSound()">🔊 Enable Sound</button>
+
+<div class="buttons">
+  <button onclick="loadWorkout('A')">Workout A</button>
+  <button onclick="loadWorkout('B')">Workout B</button>
+  <button onclick="loadWorkout('C')">Workout C</button>
+  <button onclick="loadWorkout('HIIT')">Cardio HIIT</button>
+  <button onclick="loadWorkout('MOBILITY')">Mobility</button>
+  <button onclick="openLibrary()">Library</button>
+</div>
+
+<ul id="workout"></ul>
+
+<div class="timer">
+  <div id="phaseLabel"></div>
+  <div id="progressLabel"></div>
+  <h2 id="time">00:00</h2>
+  <button onclick="stopTimer()">Stop Timer</button>
+</div>
+
+<div class="logBox">
+  <p id="lastWorkout">Last workout: None</p>
+  <button onclick="logWorkout()">✅ Log This Workout</button>
+</div>
+
+<!-- LIBRARY MODAL -->
+<div id="libraryModal">
+  <div class="libraryContent">
+    <h2>Exercise Library</h2>
+    <ul id="libraryList"></ul>
+    <button onclick="closeLibrary()">Close</button>
   </div>
+</div>
 
-  <ul id="workout"></ul>
-
-  <div class="timer">
-    <div id="phaseLabel"></div>
-    <div id="progressLabel"></div>
-    <h2 id="time">00:00</h2>
-    <div>
-      <button onclick="stopTimer()">Stop</button>
-    </div>
-  </div>
-
-  <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
