@@ -1,9 +1,22 @@
-body{background:#0b0b0b;color:#fff;font-family:-apple-system;}
-button{background:#1f1f1f;color:#fff;border:none;padding:10px;border-radius:10px}
-.exercise{border-left:4px solid #4caf50;padding:10px;margin:6px;background:#161616;border-radius:10px}
-.section{margin-top:18px;opacity:.7}
-#timer{font-size:48px}
-#progressBar{background:#333;height:6px;border-radius:3px}
+*{box-sizing:border-box}
+body{margin:0;background:#0b0b0b;color:#fff;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+header{padding:16px;text-align:center;background:#111}
+nav.vertical{display:flex;flex-direction:column;gap:8px;padding:12px}
+button{background:#1f1f1f;color:#fff;border:none;padding:12px;border-radius:12px;font-size:15px}
+#timerPanel{text-align:center;padding:12px}
+#phaseLabel{opacity:.7}
+#timer{font-size:48px;font-weight:700}
+#progressBar{background:#333;height:6px;border-radius:3px;overflow:hidden;margin:8px 0}
 #progressFill{background:#4caf50;height:100%;width:0}
+.timerButtons{display:flex;gap:8px;justify-content:center}
+main{padding:12px}
+.section{margin:18px 0 8px;font-weight:700;opacity:.85}
+.exercise{background:#161616;border-left:4px solid #4caf50;padding:10px 12px;border-radius:10px;margin-bottom:6px}
+.exercise.active{outline:2px solid #4caf50}
+.block{background:#101010;padding:8px 12px;border-radius:8px;margin-bottom:6px}
+.blockNote{font-size:12px;opacity:.6;text-transform:uppercase}
+#logPanel{text-align:center;padding:12px}
+#logStatus{font-size:13px;opacity:.7}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9)}
-.modalContent{background:#121212;margin:10%;padding:20px;border-radius:12px}
+.modalContent{background:#121212;margin:8%;padding:20px;border-radius:12px;max-height:80%;overflow:auto}
+a{color:#9ad}

@@ -1,32 +1,33 @@
-let soundEnabled=false,audioCtx=null,timer=null,currentWorkout=null;
+// State, audio, timers, workouts, library, logging
+let timer=null, soundEnabled=false, audioCtx=null, currentWorkout=null;
 const timerEl=document.getElementById('timer');
 const phaseLabel=document.getElementById('phaseLabel');
 const progressFill=document.getElementById('progressFill');
-const workout=document.getElementById('workout');
-const logStatus=document.getElementById('logStatus');
-const libraryModal=document.getElementById('libraryModal');
-const libraryList=document.getElementById('libraryList');
 
-function toggleSound(){soundEnabled=!soundEnabled;if(soundEnabled&&!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();alert(soundEnabled?'Sound enabled':'Sound muted');}
-function beep(){if(!soundEnabled||!audioCtx)return;let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.15);o.stop(audioCtx.currentTime+.15);}
+function toggleSound(){soundEnabled=!soundEnabled;if(soundEnabled&&!audioCtx){audioCtx=new (window.AudioContext||window.webkitAudioContext)();}alert(soundEnabled?'Sound enabled':'Sound muted');}
+function beep(freq=1200,dur=0.15){if(!soundEnabled||!audioCtx)return;const o=audioCtx.createOscillator();const g=audioCtx.createGain();o.frequency.value=freq;o.connect(g);g.connect(audioCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+dur);o.stop(audioCtx.currentTime+dur);}
+function updateTimer(sec){timerEl.textContent=`${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;}
+function stopTimer(){clearInterval(timer);timer=null;phaseLabel.textContent='READY';progressFill.style.width='0%';document.querySelectorAll('.exercise').forEach(e=>e.classList.remove('active'));}
 
-function updateTimer(s){timerEl.textContent=`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
-function stopTimer(){clearInterval(timer);timer=null;phaseLabel.textContent='READY';progressFill.style.width='0%'}
+function startTabata(){stopTimer();let work=20,rest=10,rounds=8,phase='WORK',t=work,max=work;phaseLabel.textContent=phase;updateTimer(t);beep();timer=setInterval(()=>{t--;updateTimer(t);progressFill.style.width=((max-t)/max*100)+'%';if(t<=0){beep();if(phase==='WORK'){phase='REST';t=rest;max=rest;}else{rounds--;if(rounds<=0){beep(400,0.5);stopTimer();return;}phase='WORK';t=work;max=work;}phaseLabel.textContent=phase;}},1000);}
+function startHIIT3030(){stopTimer();let work=30,rest=30,rounds=10,phase='WORK',t=work,max=work;phaseLabel.textContent=phase;updateTimer(t);beep();timer=setInterval(()=>{t--;updateTimer(t);progressFill.style.width=((max-t)/max*100)+'%';if(t<=0){beep();if(phase==='WORK'){phase='REST';t=rest;max=rest;}else{rounds--;if(rounds<=0){beep(400,0.5);stopTimer();return;}phase='WORK';t=work;max=work;}phaseLabel.textContent=phase;}},1000);}
+function startEMOM(){stopTimer();let minutes=10,t=60,max=60;phaseLabel.textContent='EMOM';updateTimer(t);beep();timer=setInterval(()=>{t--;updateTimer(t);progressFill.style.width=((max-t)/max*100)+'%';if(t<=0){minutes--;beep();if(minutes<=0){beep(400,0.5);stopTimer();return;}t=60;max=60;}},1000);}
 
 const workouts={
-A:[{section:'Workout A'},{name:'Barbell Back Squat',reps:'4x5'}],
-B:[{section:'Workout B'}],
-C:[{section:'Workout C'}],
-HIIT:[{section:'HIIT'},{name:'Start 20/10 Tabata',action:startHIIT}],
-MOBILITY:[{section:'Mobility'}]
+A:[{section:'Warm-Up'},{name:'World’s Greatest Stretch',reps:'5/side'},{name:'Glute Bridge',reps:'15'},{name:'Push-Ups',reps:'10'},{section:'Strength Superset'},{note:'Alternate movements'},{name:'Barbell Back Squat',sets:4,reps:'5'},{name:'Push-Ups or Bench Press',sets:4,reps:'6–10'},{section:'Kettlebell Volume'},{name:'Goblet Squat',sets:3,reps:'12'},{name:'Single-Arm KB Overhead Press',sets:3,reps:'8/side'},{section:'Finisher'},{note:'Repeat continuously'},{name:'Kettlebell Swings',reps:'10'},{name:'Burpees',reps:'10'},{section:'Cooldown'},{name:'Couch Stretch',reps:'1 min/side'},{name:'Breathing Reset',reps:'2 min'}],
+B:[{section:'Warm-Up'},{name:'Hip Hinge Drill',reps:'15'},{name:'Band Pull-Aparts',reps:'20'},{section:'Strength Superset'},{note:'Alternate movements'},{name:'Deadlift',sets:4,reps:'4–5'},{name:'Pull-Ups or Lat Pulldown',sets:4,reps:'6–10'},{section:'Kettlebell Volume'},{name:'KB Romanian Deadlift',sets:3,reps:'12'},{name:'Single-Arm KB Row',sets:3,reps:'10/side'},{section:'Finisher'},{note:'2–3 fast rounds'},{name:'Kettlebell Swings',reps:'20'},{name:'Goblet Squats',reps:'15'},{section:'Cooldown'},{name:'Hamstring Stretch',reps:'1 min/side'},{name:'Lat Stretch',reps:'1 min/side'}],
+C:[{section:'Warm-Up'},{name:'Jump Rope',reps:'2 min'},{name:'Bodyweight Squats',reps:'15'},{section:'Power & Strength'},{name:'Clean & Press (Barbell or KB)',sets:5,reps:'3'},{name:'Front Squat or Double KB Squat',sets:4,reps:'6'},{section:'Conditioning Circuit'},{note:'AMRAP'},{name:'Kettlebell Swings',reps:'10'},{name:'Reverse Lunges',reps:'8/leg'},{name:'Plank',reps:'30 sec'},{section:'Cooldown'},{name:'Hip Flexor Stretch',reps:'1 min/side'},{name:'Breathing Reset',reps:'2 min'}],
+HIIT:[{section:'HIIT Options'},{name:'HIIT 30/30 × 10',action:startHIIT3030},{name:'Tabata 20/10 × 8',action:startTabata},{name:'EMOM 10 min',action:startEMOM}],
+MOBILITY:[{section:'Mobility Day'},{name:'90/90 Hip Mobility',reps:'1 min/side'},{name:'World’s Greatest Stretch',reps:'5/side'},{name:'Thoracic Rotation',reps:'10/side'},{name:'Couch Stretch',reps:'1–2 min/side'},{name:'Breathing Reset',reps:'3–5 min'}]
 };
 
-function loadWorkout(k){currentWorkout=k;workout.innerHTML='';workouts[k].forEach(i=>{let li=document.createElement('li');if(i.section){li.className='section';li.textContent=i.section}else if(i.action){li.className='exercise';let b=document.createElement('button');b.textContent=i.name;b.onclick=i.action;li.appendChild(b)}else{li.className='exercise';li.textContent=i.name+' '+(i.reps||'')}workout.appendChild(li);});}
+const workoutEl=document.getElementById('workout');
+function loadWorkout(type){stopTimer();currentWorkout=type;workoutEl.innerHTML='';workouts[type].forEach(item=>{if(item.section){const li=document.createElement('li');li.className='section';li.textContent=item.section;workoutEl.appendChild(li);return;}if(item.note){const li=document.createElement('li');li.className='block';li.innerHTML=`<div class="blockNote">${item.note}</div>`;workoutEl.appendChild(li);return;}const li=document.createElement('li');li.className='exercise';if(item.action){const b=document.createElement('button');b.textContent=item.name;b.onclick=()=>{highlight(li);item.action();};li.appendChild(b);}else{li.innerHTML=`<strong>${item.name}</strong><div>${item.sets?item.sets+' × '+item.reps:item.reps}</div>`;}workoutEl.appendChild(li);});}
+function highlight(li){document.querySelectorAll('.exercise').forEach(e=>e.classList.remove('active'));li.classList.add('active');}
 
-function startHIIT(){stopTimer();let s=20,r=8,w=true;phaseLabel.textContent='WORK';updateTimer(s);beep();timer=setInterval(()=>{s--;updateTimer(s);progressFill.style.width=((20-s)/20*100)+'%';if(s<=0){beep();if(w){w=false;s=10;phaseLabel.textContent='REST'}else{w=true;r--;s=20;phaseLabel.textContent='WORK'}if(r<=0)stopTimer()}},1000)}
+function logWorkout(){if(!currentWorkout){alert('Load a workout first');return;}const log=JSON.parse(localStorage.getItem('workoutLog')||'[]');log.push({workout:currentWorkout,date:new Date().toISOString()});localStorage.setItem('workoutLog',JSON.stringify(log));document.getElementById('logStatus').textContent='Logged '+currentWorkout+' on '+new Date().toLocaleDateString();}
 
-function logWorkout(){if(!currentWorkout)return;let l=JSON.parse(localStorage.getItem('log')||'[]');l.push({w:currentWorkout,d:new Date().toISOString()});localStorage.setItem('log',JSON.stringify(l));logStatus.textContent='Logged '+currentWorkout}
+const videoMap={'World’s Greatest Stretch':'https://youtu.be/Fsa_CjlT6IY','Glute Bridge':'https://youtu.be/m2Zx-57cSok','Push-Ups':'https://youtu.be/IODxDxX7oi4','Barbell Back Squat':'https://youtu.be/SW_C1A-rejs','Bench Press':'https://youtu.be/rT7DgCr-3pg','Goblet Squat':'https://youtu.be/6xwGFn-J_QA','Single-Arm KB Overhead Press':'https://youtu.be/spkG8z6p0oQ','Kettlebell Swings':'https://youtu.be/YSxHifyI6s8','Burpees':'https://youtu.be/TU8QYVW0gDU','Hip Hinge Drill':'https://youtu.be/1JX0cQ9Zp9A','Band Pull-Aparts':'https://youtu.be/2pLT-olgUJs','Deadlift':'https://youtu.be/op9kVnSso6Q','Pull-Ups':'https://youtu.be/eGo4IYlbE5g','Lat Pulldown':'https://youtu.be/CAwf7n6Luuc','KB Romanian Deadlift':'https://youtu.be/0F0pV8q5C1U','Single-Arm KB Row':'https://youtu.be/1b98W1G3j1g','Hamstring Stretch':'https://youtu.be/5m0Z8Y3fQ3k','Lat Stretch':'https://youtu.be/2L2lnxIcNmo','Jump Rope':'https://youtu.be/1BZMZk0Z1Y8','Bodyweight Squats':'https://youtu.be/aclHkVaku9U','Clean & Press (Barbell or KB)':'https://youtu.be/3H2j6FQwYkU','Front Squat or Double KB Squat':'https://youtu.be/t2b8UdqmlFs','Reverse Lunges':'https://youtu.be/7YQe2s9R3Dk','Plank':'https://youtu.be/pSHjTRCQxIw','Hip Flexor Stretch':'https://youtu.be/7bRaX6M2nr8','90/90 Hip Mobility':'https://youtu.be/2uYJZfB3k_U','Thoracic Rotation':'https://youtu.be/v3u8J1uQnC0','Breathing Reset':'https://youtu.be/8TuRYV71Rgo'};
 
-const videos={Squat:'https://youtu.be/SW_C1A-rejs'};
-function openLibrary(){libraryList.innerHTML='';Object.entries(videos).forEach(([n,u])=>{let li=document.createElement('li');li.innerHTML=`<a href="${u}" target="_blank">${n}</a>`;libraryList.appendChild(li)});libraryModal.style.display='block'}
-function closeLibrary(){libraryModal.style.display='none'}
+function openLibrary(){const list=document.getElementById('libraryList');list.innerHTML='';const set=new Set();Object.values(workouts).forEach(day=>day.forEach(i=>i.name&&set.add(i.name)));Array.from(set).forEach(name=>{const li=document.createElement('li');const url=videoMap[name]||('https://www.youtube.com/results?search_query='+encodeURIComponent(name+' exercise'));li.innerHTML=`<a href="${url}" target="_blank">${name}</a>`;list.appendChild(li);});document.getElementById('libraryModal').style.display='block';}
+function closeLibrary(){document.getElementById('libraryModal').style.display='none';}

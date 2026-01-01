@@ -1,42 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Workout App</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
 <header><h1>Workout Program</h1></header>
 
-<nav>
-<button onclick="loadWorkout('A')">Workout A</button>
-<button onclick="loadWorkout('B')">Workout B</button>
-<button onclick="loadWorkout('C')">Workout C</button>
-<button onclick="loadWorkout('HIIT')">HIIT</button>
-<button onclick="loadWorkout('MOBILITY')">Mobility</button>
-<button onclick="openLibrary()">Library</button>
+<nav class="vertical">
+  <button onclick="loadWorkout('A')">Workout A</button>
+  <button onclick="loadWorkout('B')">Workout B</button>
+  <button onclick="loadWorkout('C')">Workout C</button>
+  <button onclick="loadWorkout('HIIT')">HIIT</button>
+  <button onclick="loadWorkout('MOBILITY')">Mobility</button>
+  <button onclick="openLibrary()">Library</button>
 </nav>
 
 <section id="timerPanel">
-<div id="phaseLabel">READY</div>
-<div id="timer">00:00</div>
-<div id="progressBar"><div id="progressFill"></div></div>
-<button onclick="toggleSound()">Enable Sound</button>
-<button onclick="stopTimer()">Stop</button>
+  <div id="phaseLabel">READY</div>
+  <div id="timer">00:00</div>
+  <div id="progressBar"><div id="progressFill"></div></div>
+  <div class="timerButtons">
+    <button onclick="toggleSound()">Enable Sound</button>
+    <button onclick="stopTimer()">Stop</button>
+  </div>
 </section>
 
-<ul id="workout"></ul>
+<main><ul id="workout"></ul></main>
 
-<button onclick="logWorkout()">Log Workout</button>
-<div id="logStatus"></div>
+<section id="logPanel">
+  <button onclick="logWorkout()">Log Workout</button>
+  <div id="logStatus"></div>
+</section>
 
 <div id="libraryModal" class="modal">
-<div class="modalContent">
-<h2>Exercise Library</h2>
-<ul id="libraryList"></ul>
-<button onclick="closeLibrary()">Close</button>
-</div>
+  <div class="modalContent">
+    <h2>Exercise Library</h2>
+    <ul id="libraryList"></ul>
+    <button onclick="closeLibrary()">Close</button>
+  </div>
 </div>
 
 <script src="app.js"></script>
